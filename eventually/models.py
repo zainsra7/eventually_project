@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     max_length = 200
     user = models.OneToOneField(User)
-    # fullname = models.CharField(max_length=max_length)
+    fullname = models.CharField(max_length=max_length)
     # email = models.CharField(max_length=max_length) # Email is already in the USER object
     profile_pic = models.ImageField(upload_to='profile_images', blank=True)
     ver_code = models.CharField(max_length=6)
