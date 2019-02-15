@@ -1,0 +1,15 @@
+{% extends 'eventually/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+    Home
+{% endblock %}
+
+{% block body_block %}
+<div>
+    {% if user.is_authenticated %} <h1>Welcome {{user.username}}</h1>
+    {% else %}
+        <h1>Here are our latest events : ...</h1>
+    {% endif %}
+</div>
+{% endblock %}

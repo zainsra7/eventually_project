@@ -5,4 +5,6 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'about/$', views.about, name='about'),
     url(r'register/$', views.register, name='register'),
+    url(r'account-confirmation/$', views.account_confirmation, name='account-confirmation'),
+    url(r'login/$', views.user_login, name='login'),
 ]

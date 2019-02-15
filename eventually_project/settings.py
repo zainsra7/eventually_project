@@ -6,6 +6,12 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 MEDIA_DIR = os.path.join(BASE_DIR, 'media')
 
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'samuelagbede'
+EMAIL_HOST_PASSWORD = 'samuel1234'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'l8rw$%qdwtw=39+26ykdo^-ste1t9^1g9fiw$vcs+p2zwxhw8k'
 
