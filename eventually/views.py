@@ -182,7 +182,7 @@ def password_reset(request):
                 if profile.ver_code == ver_code:
                     user.set_password(password)
                     user.save()
-                    return render(request, 'eventually/index.html', {})
+                    return render(request, 'eventually/index.html', {'user':user})
                 else:
                     return render(request, 'eventually/forgot_password_confirmation.html',
                                   {'error': 'Verification code is incorrect'})
