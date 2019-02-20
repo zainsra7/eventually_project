@@ -1,4 +1,5 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -13,6 +14,7 @@ import random
 from eventually.models import UserProfile
 
 
+@login_required
 def index(request):
     print(request.user)
     return render(request, 'eventually/index.html', {})
@@ -22,6 +24,10 @@ def about(request):
     return HttpResponse("WHY")
 
 
+def generate_random_code():
+    return random.randint(100000, 999999)
+
+
 def account_confirmation(request):
     if request.method == 'POST':
         ver_code = request.POST.get('ver_code')
@@ -29,10 +35,14 @@ def account_confirmation(request):
         id = request.session['profile_id']
         try:
             user = User.objects.get(id=id)
+
             profile = UserProfile.objects.get(user=user)
 
             if ver_code == profile.ver_code:
-                logged_in_user = authenticate(username='samuel', password='samuel1234')
+                print(user.username, user.password)
+                user.active = True
+                user.save()
+                logged_in_user = authenticate(request, username=user.username, password=user.password)
                 print(logged_in_user)
 
                 if logged_in_user:
@@ -43,12 +53,12 @@ def account_confirmation(request):
                         profile.save()
                         return HttpResponseRedirect(reverse('index'))
             else:
-                return render(request, 'eventually/account-confirmation.html',
-                               {'error': 'Please enter a valid code. Wrong code inputted.'})
+                return render(request, 'eventually/account_confirmation.html',
+                              {'error': 'Please enter a valid code. Wrong code inputted.'})
         except User.DoesNotExist:
             return HttpResponseRedirect(reverse('register'))
 
-    return render(request, 'eventually/account-confirmation.html', {})
+    return render(request, 'eventually/account_confirmation.html', {})
 
 
 def user_login(request):
@@ -57,12 +67,13 @@ def user_login(request):
         password = request.POST.get('password')
 
         user = authenticate(username=username, password=password)
-        print(user)
 
         if user:
             if user.is_active:
                 login(request, user)
                 return HttpResponseRedirect(reverse('index'))
+        else:
+            return render(request, 'eventually/login.html', {'error':'Login failed. Please check your login details'})
 
     return render(request, 'eventually/login.html', {})
 
@@ -91,15 +102,14 @@ def register(request):
                 profile.approved = False
 
             # Generate verification code and send to the user's email address
-            activation_code = random.randint(100000, 999999)
-            profile.ver_code = activation_code
+            profile.ver_code = generate_random_code()
             profile.save()
-            send_mail_api(profile.user.username, profile.user.email, activation_code)
+            send_mail_api(profile.user.username, profile.user.email, profile.ver_code)
 
             # save user profile id to session
             request.session['profile_id'] = user.id
 
-            return HttpResponseRedirect(reverse('account-confirmation'))
+            return HttpResponseRedirect(reverse('account_confirmation'))
 
         else:
             print(user_form.errors, profile_form.errors)
@@ -123,3 +133,70 @@ def send_mail_api(username, email, ver_code):
     print(username, email, ver_code)
     send_mail("Verification code", "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code),
               "events@eventually.com", [email], fail_silently=True)
+
+
+def send_mail_forgot_password(email, ver_code):
+    send_mail("Reset your password", "Please enter this code to reset to your password : %s" % ver_code,
+              "events@eventually.com", [email], fail_silently=True)
+
+
+# Apologies for the ambiguity between forgot_password and password reset. Forgot_password is the first page
+# where users get to enter their email address. Whereas password reset is the next page where the user
+# actually enters the new passcode and verification code
+def forgot_password(request):
+    # Possibly better option is to use a form field.
+    if request.method == 'POST':
+        email = request.POST.get('email')
+
+        ver_code = generate_random_code()
+        send_mail_forgot_password(email, ver_code)
+        request.session["email"] = email
+        try:
+            user = User.objects.get(email=email)
+            profile = UserProfile.objects.get(user=user)
+            profile.ver_code = ver_code
+            profile.save()
+
+            return HttpResponseRedirect(reverse('password_reset'))
+        except User.DoesNotExist:
+            return render(request, 'eventually/forgot_password.html',
+                              {'error': 'Email address is incorrect'})
+        except UserProfile.DoesNotExist:
+            return render(request, 'eventually/forgot_password.html',
+                              {'error': 'Email address is incorrect'})
+
+    return render(request, 'eventually/forgot_password.html', {})
+
+
+def password_reset(request):
+    if request.method == 'POST':
+        email = request.session["email"]
+        password = request.POST.get('password')
+        ver_code = request.POST.get('ver_code')
+
+        try:
+            user = User.objects.get(email=email)
+            profile = UserProfile.objects.get(user=user)
+
+            if profile:
+                if profile.ver_code == ver_code:
+                    user.set_password(password)
+                    user.save()
+                    return render(request, 'eventually/index.html', {})
+                else:
+                    return render(request, 'eventually/forgot_password_confirmation.html',
+                                  {'error': 'Verification code is incorrect'})
+            else:
+                return render(request, 'eventually/forgot_password_confirmation.html',
+                              {'error': 'Email address is incorrect'})
+        except User.DoesNotExist:
+            return render(request, 'eventually/forgot_password_confirmation.html',
+                              {'error': 'Email address is incorrect'})
+
+    return render(request, 'eventually/forgot_password_confirmation.html', {})
+
+
+@login_required
+def sign_out(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('login'))

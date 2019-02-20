@@ -6,16 +6,17 @@
 {% endblock %}
 
 {% block body_block %}
-    <h1>Please enter verification code</h1>
+    <h1>Please enter verification code sent your mail : {{ request.user.email }}</h1>
 
 
-    <form action="{% url 'account-confirmation' %}" method="post">
+    <form action="{% url 'account_confirmation' %}" method="post">
         {% csrf_token %}
 
         {% if error %}
             {{ error }}
         {% endif %}
         <br/>
+
         Verification Code: <input type="text" name="ver_code"/>
         <input type="submit" value="Submit">
     </form>

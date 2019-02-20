@@ -8,6 +8,7 @@
 {% block body_block %}
 <div>
     {% if user.is_authenticated %} <h1>Welcome {{user.username}}</h1>
+    <a href = "{% url 'sign_out' %}">Sign out</a>
     {% else %}
         <h1>Here are our latest events : ...</h1>
     {% endif %}
