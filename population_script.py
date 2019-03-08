@@ -12,17 +12,14 @@ from eventually.models import UserProfile, Event, Attendee, Tag
 def populate():
     users = [{
         'username': 'Test1',
-        #'fullname': 'Test1',
         'email': 'test1@gmail.com',
         'password': 'test11234',
     },{
         'username': 'Test2',
-        #'fullname': 'Test2',
         'email': 'test2@gmail.com',
         'password': 'test21234',
     },{
         'username': 'Test3',
-        #'fullname': 'Test3',
         'email': 'test3@gmail.com',
         'password': 'test31234',
     },]
@@ -130,14 +127,6 @@ def populate():
             'event': events[4]["title"],
         },
     ]
-
-    # Create Users
-    #for user in users:
-        #add_user_profile(user)
-
-    # Create Events
-    #for event in events:
-        #add_event(event)
 
     # Create Tags
     for tag in tags:
