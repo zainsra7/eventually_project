@@ -8,6 +8,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     profile_pic = models.ImageField(upload_to='profile_images', blank=True)
     ver_code = models.CharField(max_length=6)
+    fullname = models.CharField(max_length=100)
     approved = models.BooleanField(default=False)
 
     def __str__(self):
