@@ -32,6 +32,15 @@ i {
 
 /* Main Body Content */
 
+.jumbotron-wrapper{
+  display: flex;
+  flex-direction: column;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position-x: 20%;
+  background-position-y: 10%;
+  }
+
 .main-container{
   width: 100%;
   height: 320px;
@@ -39,10 +48,6 @@ i {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  background: url("img.jpg");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center center;
 }
 .heading{
   flex: 1;

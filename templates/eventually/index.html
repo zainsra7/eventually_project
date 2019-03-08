@@ -5,11 +5,15 @@
 Index
 {% endblock %}
 
+{% block jumbotron%}
+<div class = "jumbotron-wrapper" style="background-image: url({% static 'images/background.jpg' %});">
+{% endblock %}
+
 {% block body_block %}
 
 <!-- Host Event, Search Event, Popular Events (Using CSS Flexbox)-->
 <main>
-    <div class="main-container" style="background-image: url({% static 'images/background.jpg' %});">
+    <div class="main-container">
         <div class="heading w3-animate-zoom">
             <div class="w3-panel w3-topbar w3-bottombar w3-border-blue">
                 <!-- Source: csstricks.com -->
@@ -31,6 +35,7 @@ Index
         </div>
         <a id="pin-btn" class="btn-floating pulse btn blue"><i class="material-icons large">pin_drop</i></a>
     </div>
+</div> <!-- End of Jumbotron wrapper -->
     <div id="popular-events" class="container">
         <h2 id="popular-events-title">Popular Events</h2>
         {% if events %}
