@@ -5,7 +5,31 @@
 Index
 {% endblock %}
 
-{% block body_block %}
+{% block css_block %}
+<link rel="stylesheet" href="/maps/documentation/javascript/cgc/demos.css">
+{% endblock %}
 
+{% block body_block %}
+    <div class="card"><div class="card-content"><div id="map"></div></div></div>
+    <script>
+      function initMap() {
+        var myLatLng = {lat: -25.363, lng: 131.044};
+
+        // Create a map object and specify the DOM element
+        // for display.
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: myLatLng,
+          zoom: 4
+        });
+
+        // Create a marker and set its position.
+        var marker = new google.maps.Marker({
+          map: map,
+          position: myLatLng,
+          title: 'Hello World!'
+        });
+      }
+
+    </script>
 
 {% endblock %}

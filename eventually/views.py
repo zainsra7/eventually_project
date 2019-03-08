@@ -10,7 +10,11 @@ def index(request):
     return response
 
 def dashboard(request):
-    return HttpResponse("Dashboard: Showing User's Events + Search bar/Filtering")
+    #Fetch Popular Events from Database
+    events = range(5)
+    context_dict = {'events': events, }
+    response = render(request, 'eventually/dashboard.html', context=context_dict)
+    return response
     
 def search(request):
     return HttpResponse("Search Page showing all events based on search string")
@@ -19,7 +23,8 @@ def host(request):
     return HttpResponse("Host Event Page to create an event")
     
 def event(request):
-    return HttpResponse("Event View Page to show a specific event details alongwith Sharing, maps and contacting host")
+    response = render(request, 'eventually/event.html', context={})
+    return response
 
 def profile(request):
     return HttpResponse("Profile page to edit user profile")

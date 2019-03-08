@@ -8,6 +8,9 @@
     <link href="{% static 'eventually/css/base.css' %}" type="text/css" rel="stylesheet" />
     <link href="{% static 'eventually/css/index.css' %}" type="text/css" rel="stylesheet" />
     <link href="{% static 'eventually/css/event.css' %}" type="text/css" rel="stylesheet" />
+    {% block css_block %}
+    {% endblock %}
+
     <!-- Online CSS files (Materialize, Font Awesome Icons, Google Fonts, W3.CSS)-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
@@ -20,6 +23,16 @@
         {% block title_block %}
         {% endblock %}
     </title>
+
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+         * element that contains the map. */
+        #map {
+          height: 300px;
+          width: 300px;
+        }
+      </style>
+  
 </head>
 
 <body>
@@ -131,6 +144,8 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJlIszJVlj-hrIWavrpCGaeCvckZWVd5Q&callback=initMap"
+        async defer></script>
     <!-- Custom Js Files -->
     <script src="{% static 'eventually/js/base.js' %}"></script>
     <script src="{% static 'eventually/js/index.js' %}"></script>

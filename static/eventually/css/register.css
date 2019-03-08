@@ -1,0 +1,9 @@
+#register-row {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+#register-row .card-action {
+    text-align: center;
+}
