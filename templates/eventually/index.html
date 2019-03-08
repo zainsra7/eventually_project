@@ -36,13 +36,13 @@ Index
         <a id="pin-btn" class="btn-floating pulse btn blue"><i class="material-icons large">pin_drop</i></a>
     </div>
 </div> <!-- End of Jumbotron wrapper -->
-    <div id="popular-events" class="container">
+    <div id="popular-events" >
         <h2 id="popular-events-title">Popular Events</h2>
         {% if events %}
         {% for event in events %}
         <a href="{% url 'event'%}">
             <div class="flip">
-                <div class="front" style="background-image: url(https://images.pexels.com/photos/540518/pexels-photo-540518.jpeg?w=1260&h=750&dpr=2&auto=compress&cs=tinysrgb)">
+                <div class="front" style="background-image: url({{ MEDIA_URL }}profile_images/rango.jpg)">
                     <div class="example-date">
                         <span class="day">07</span>
                         <span class="month">Dec</span>

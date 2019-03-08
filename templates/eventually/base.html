@@ -4,7 +4,11 @@
 <html>
 
 <head lang="en">
-    <link href="{% static 'eventually/style.css' %}" type="text/css" rel="stylesheet" />
+    <!-- Custom CSS files -->
+    <link href="{% static 'eventually/css/base.css' %}" type="text/css" rel="stylesheet" />
+    <link href="{% static 'eventually/css/index.css' %}" type="text/css" rel="stylesheet" />
+    <link href="{% static 'eventually/css/event.css' %}" type="text/css" rel="stylesheet" />
+    <!-- Online CSS files (Materialize, Font Awesome Icons, Google Fonts, W3.CSS)-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
         crossorigin="anonymous">
@@ -20,12 +24,12 @@
 
 <body>
     <!-- Header: Navbar -->
-    
+
     <!-- Block for Jumbotron Wrapper -->
     {% block jumbotron %}
     {% endblock %}
 
-        <header>
+    <header>
         <div class="navbar">
             <nav class="nav-extended transparent z-depth-0">
                 <div class="nav-wrapper">
@@ -36,10 +40,11 @@
                                     class="material-icons">home</i></a></li>
                         {% if user.is_authenticated %}
                         <li><a href="{% url 'dashboard' %}" class="waves-effect waves-green btn-floating blue white-text waves-circle"><i
-                            class="material-icons">dashboard</i></a></li>
+                                    class="material-icons">dashboard</i></a></li>
                         <li><a href="{% url 'profile' %}" class="waves-effect waves-green btn-floating blue white-text waves-circle"><i
-                                class="material-icons">person</i></a></li>
-                        <li><a href="{% url 'logout' %}" class="waves-effect waves-green btn-floating blue white-text waves-circle"><i class="fas fa-sign-out-alt"></i></a></li>
+                                    class="material-icons">person</i></a></li>
+                        <li><a href="{% url 'logout' %}" class="waves-effect waves-green btn-floating blue white-text waves-circle"><i
+                                    class="fas fa-sign-out-alt"></i></a></li>
                         {% else %}
                         <li><a id="signup-btn" href="{% url 'register' %}" class="waves-effect waves-light green btn w3-round-large">SignUp</a></li>
                         <li>
@@ -67,7 +72,7 @@
         <ul class="sidenav" id="slide-out">
             <li>
                 <div class="user-view">
-                    <div class="background light-blue">
+                    <div class="background">
                     </div>
                     {% if user.is_authenticated %}
                     <img class="circle responsive-img" src="{{ MEDIA_URL }}profile_images/rango.jpg">
@@ -85,22 +90,25 @@
                 <div class="divider"></div>
             </li>
             {% if user.is_authenticated %}
-            <li><a href="{% url 'dashboard' %}" class="waves-effect waves-green"><i class="material-icons">dashboard</i> Dashboard</a></li>
+            <li><a href="{% url 'dashboard' %}" class="waves-effect waves-green"><i class="material-icons">dashboard</i>
+                    Dashboard</a></li>
             <li>
                 <div class="divider"></div>
             </li>
-            <li><a href="{% url 'profile' %}" class="waves-effect waves-green"><i class="material-icons">person</i> Profile</a></li>
+            <li><a href="{% url 'profile' %}" class="waves-effect waves-green"><i class="material-icons">person</i>
+                    Profile</a></li>
             <li>
                 <div class="divider"></div>
             </li>
             <li><a href="{%url 'logout' %}" class="waves-effect waves-green"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             {% else %}
-            <li><a href="{% url 'register' %}" class="waves-effect waves-green"><i class="material-icons">person_add</i> Sign Up</a></li>
+            <li><a href="{% url 'register' %}" class="waves-effect waves-green"><i class="material-icons">person_add</i>
+                    Sign Up</a></li>
             <li>
                 <div class="divider"></div>
             </li>
             <li><a href="{% url 'login' %}" class="waves-effect waves-green"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-             {% endif %}
+            {% endif %}
         </ul>
     </header>
 
@@ -119,12 +127,12 @@
             <!-- <a href="{% url 'contact' %}">Contact</a> -->
         </div>
     </div>
-    <!-- Compiled and minified JavaScript -->
+    <!-- Online Js Files (JQuery, Materialize) -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="{% static 'eventually/index.js' %}"></script>
-
+    <!-- Custom Js Files -->
+    <script src="{% static 'eventually/js/base.js' %}"></script>
+    <script src="{% static 'eventually/js/index.js' %}"></script>
 </body>
-
 </html>

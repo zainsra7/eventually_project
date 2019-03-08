@@ -1,16 +1,5 @@
 $(document).ready(function(){
-    $(".sidenav").sidenav();
     $(".host-search-bar").hide();
-
-    $("#login-btn").click(function(){
-      $("#login-btn").hide();
-      $("#login-form").show("slow");
-    });
-
-    $("#cancel-login-btn").click(function(){
-      $("#login-form").hide("slow");
-      $("#login-btn").show();
-    });
 
     $("#pin-btn").click(function(){
       $("#pin-btn").hide();
@@ -18,8 +7,7 @@ $(document).ready(function(){
     });
 });
 
-
-//Following scripts are taken from csstricks.com to generate typewriter effect
+//Following scripts are from csstricks.com to generate typewriter effect
 
 var TxtType = function(el, toRotate, period) {
   this.toRotate = toRotate;
