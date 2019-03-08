@@ -23,9 +23,8 @@ def host(request):
     return HttpResponse("Host Event Page to create an event")
     
 def event(request):
-    response = render(request, 'eventually/event.html', context={})
-    return response
-
+    return render(request, 'eventually/event.html', {})
+    
 def profile(request):
     return HttpResponse("Profile page to edit user profile")
 
