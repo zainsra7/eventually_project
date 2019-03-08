@@ -7,65 +7,56 @@ Index
 
 {% block body_block %}
 
-<!-- Jumbotron (Search Bar) Popular Tags, Popular Events -->
-
-<main class="w3-mobile">
-    <div class="jumbo" style="background-image: url({% static 'images/background.jpg' %});">
-        <div class="w3-display-container">
-            <div class="w3-display-middle">
-                <div class="w3-animate-zoom w3-panel w3-topbar w3-bottombar w3-border-blue">
-                    <!-- Source: csstricks.com -->
-                    <p class="w3-lobster typewrite white-text w3-xxlarge flow-text" data-period="80"
-                        data-type='[ "Be a Host.", "Join an Event.", "@UoG", "Engage, Have Fun !" ]'>
-                        <span class="wrap"></span>
-                    </p>
-                </div>
-            </div>
-            <div class="w3-display-topmiddle">
-            </div>
-            <div class="w3-display-bottommiddle">
-                <a id="pin-btn" class="btn-floating pulse btn blue"><i class="material-icons large">pin_drop</i></a>
-                <div id="host-search-bar" class="black w3-panel w3-leftbar w3-rightbar w3-border-blue">
-                    <a id="host-btn" class="waves-effect waves-green waves-light btn"><i
-                            class="material-icons left">add_circle</i>Host</a>
-                    <form id="search-form">
-                        <div class="input-field inline">
-                            <input id="search-field" type="text" class="validate white-text">
-                            <label for="search-field">Search</label>
-                        </div>
-                        <a href="#" type="submit"
-                            class="waves-effect waves-green btn-floating green white-text waves-circle"><i
-                                class="material-icons">search</i></a>
-                    </form>
-                </div>
+<!-- Host Event, Search Event, Popular Events (Using CSS Flexbox)-->
+<main>
+    <div class="main-container" style="background-image: url({% static 'images/background.jpg' %});">
+        <div class="heading w3-animate-zoom">
+            <div class="w3-panel w3-topbar w3-bottombar w3-border-blue">
+                <!-- Source: csstricks.com -->
+                <p class="w3-typewriter typewrite white-text w3-xxlarge flow-text" data-period="80" data-type='[ "Be a Host.", "Join an Event.", "@UoG", "Engage, Have Fun !" ]'>
+                    <span class="wrap"></span>
+                </p>
             </div>
         </div>
+        <div class="host-search-bar black">
+            <a id="host-btn" href="{% url 'host' %}" class="waves-effect waves-green waves-light btn"><i class="material-icons left">add_circle</i>Host</a>
+            <form id="search-form">
+                <div class="input-field inline">
+                    <input id="search-field" type="text" class="validate white-text">
+                    <label for="search-field">Search</label>
+                </div>
+                <a href="{% url 'search' %}" type="submit" class="waves-effect waves-green btn-floating green white-text waves-circle"><i
+                        class="material-icons">search</i></a>
+            </form>
+        </div>
+        <a id="pin-btn" class="btn-floating pulse btn blue"><i class="material-icons large">pin_drop</i></a>
+    </div>
+    <div id="popular-events" class="container">
+        <h2 id="popular-events-title">Popular Events</h2>
+        {% if events %}
+        {% for event in events %}
+        <a href="{% url 'event'%}">
+            <div class="flip">
+                <div class="front" style="background-image: url(https://images.pexels.com/photos/540518/pexels-photo-540518.jpeg?w=1260&h=750&dpr=2&auto=compress&cs=tinysrgb)">
+                    <div class="example-date">
+                        <span class="day">07</span>
+                        <span class="month">Dec</span>
+                        <span class="year">2019</span>
+                    </div>
+                </div>
+                <div class="back">
+                    <h4 class="event-title">Event Title</h4>
+                    <div class="divider"></div>
+                    <p class="event-description">Description...</p>
+                    <div class="divider"></div>
+                    <p class="event-location">Location</p>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+        {% else %}
+        No events
+        {% endif %}
     </div>
 </main>
-
-<div id="popular-events" class="container">
-    <h4 id="popular-events-title">Popular Events</h4>
-    <div class="row" id="popular-events-row">
-    {% if events %}
-    {% for event in events %}
-    <a href="#">
-        <div class="flip-card" href="#">
-            <div class="flip-card-inner">
-                <div class="flip-card-front">
-                    <img class="card-img" src="{% static 'images/background.jpg' %}">
-                </div>
-                <div class="flip-card-back">
-                    <h5 class="card-title">Event Title</h5>
-                    <p class="card-text">Location</p>
-                    <p class="card-text">Date</p>
-                </div>
-            </div>
-        </div>
-    </a>
-    {% endfor %}
-    {% else %}
-    No events
-    {% endif %}
-    </div>
-</div>
 {% endblock %}
