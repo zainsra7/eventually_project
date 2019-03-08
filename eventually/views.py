@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render
+from eventually.forms import UserForm, UserProfileForm
 
 def index(request):
     #Fetch Popular Events from Database
@@ -24,7 +25,51 @@ def profile(request):
     return HttpResponse("Profile page to edit user profile")
 
 def register(request):
-    return HttpResponse("Sign Up Page")
+    # Successful registration check
+    registered = False
+
+    if request.method == 'POST':
+        
+        user_form = UserForm(data=request.POST)
+        profile_form = UserProfileForm(data=request.POST)
+
+        # Check if forms are valid
+        if user_form.is_valid() and profile_form.is_valid():
+
+            # Save user's form data to database
+            user = user_form.save()
+
+            # Hash password and save user object
+            user.set_password(user.password)
+            user.save()
+
+            # Save user profile form date to database
+            profile = profile_form.save(commit=False)
+            profile.user = user
+
+            # Add profile picture to UserProfile model if provided by user
+            if 'profile_pic' in request.FILES:
+                profile.profile_pic = request.FILES['picture']
+
+            # Save the UserProfile model instance
+            profile.save()
+
+            # Indicate that registration was successful
+            registered = True
+
+        else:
+            # Print problems to the terminal in case of invalid forms
+            print(user_form.errors, profile_form.errors)
+
+    else:
+        # Render blank form if not HTTP POST
+        user_form = UserForm()
+        profile_form = UserProfileForm()
+
+    # Render template depending on the context.
+    return render(request, 'eventually/register.html', {'user_form': user_form,
+                                                        'profile_form': profile_form,
+                                                        'registered': registered})
 
 def logout(request):
     return HttpResponse("Logout")
