@@ -5,9 +5,11 @@
 
 <head lang="en">
     <!-- Custom CSS files -->
+    {% block index_css %}
+    {% endblock %}
+    {% block event_css %}
+    {% endblock %}
     <link href="{% static 'eventually/css/base.css' %}" type="text/css" rel="stylesheet" />
-    <link href="{% static 'eventually/css/index.css' %}" type="text/css" rel="stylesheet" />
-    <link href="{% static 'eventually/css/event.css' %}" type="text/css" rel="stylesheet" />
     <!-- Online CSS files (Materialize, Font Awesome Icons, Google Fonts, W3.CSS)-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
@@ -23,12 +25,11 @@
 </head>
 
 <body>
-    <!-- Header: Navbar -->
-
     <!-- Block for Jumbotron Wrapper -->
     {% block jumbotron %}
     {% endblock %}
 
+    <!-- Header: Navbar -->
     <header>
         <div class="navbar">
             <nav class="nav-extended transparent z-depth-0">
