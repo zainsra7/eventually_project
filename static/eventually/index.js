@@ -1,5 +1,6 @@
 $(document).ready(function(){
-    $('.sidenav').sidenav();
+    $(".sidenav").sidenav();
+    $(".host-search-bar").hide();
 
     $("#login-btn").click(function(){
       $("#login-btn").hide();
@@ -13,7 +14,7 @@ $(document).ready(function(){
 
     $("#pin-btn").click(function(){
       $("#pin-btn").hide();
-      $("#host-search-bar").show("slow");
+      $(".host-search-bar").show("show");
     });
 });
 

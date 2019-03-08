@@ -6,8 +6,8 @@
 <head lang="en">
     <link href="{% static 'eventually/style.css' %}" type="text/css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
-        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
+        crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Anton">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -19,18 +19,29 @@
 </head>
 
 <body>
-
     <!-- Header: Navbar -->
-    <header>
-        <div class="navbar-fixed">
+    
+    <!-- Block for Jumbotron Wrapper -->
+    {% block jumbotron %}
+    {% endblock %}
+
+        <header>
+        <div class="navbar">
             <nav class="nav-extended transparent z-depth-0">
                 <div class="nav-wrapper">
                     <a class="brand-logo"><img id="logo" src="{% static 'images/logo.png' %}" height="40" /></a>
                     <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">dehaze</i></a>
                     <ul id="nav-mobile" class="right hide-on-med-and-down">
-                        <li><a href="#" class="waves-effect waves-green btn-floating blue white-text waves-circle"><i
+                        <li><a href="{% url 'index' %}" class="waves-effect waves-green btn-floating blue white-text waves-circle"><i
                                     class="material-icons">home</i></a></li>
-                        <li><a id="signup-btn" class="waves-effect waves-light green btn w3-round-large">SignUp</a></li>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'dashboard' %}" class="waves-effect waves-green btn-floating blue white-text waves-circle"><i
+                            class="material-icons">dashboard</i></a></li>
+                        <li><a href="{% url 'profile' %}" class="waves-effect waves-green btn-floating blue white-text waves-circle"><i
+                                class="material-icons">person</i></a></li>
+                        <li><a href="{% url 'logout' %}" class="waves-effect waves-green btn-floating blue white-text waves-circle"><i class="fas fa-sign-out-alt"></i></a></li>
+                        {% else %}
+                        <li><a id="signup-btn" href="{% url 'register' %}" class="waves-effect waves-light green btn w3-round-large">SignUp</a></li>
                         <li>
                             <form id="login-form" class="black w3-panel w3-leftbar w3-rightbar w3-border-blue">
                                 <div class="input-field inline">
@@ -41,15 +52,14 @@
                                     <input id="password" type="password" class="validate white-text">
                                     <label for="password">Password</label>
                                 </div>
-                                <a href="#"
-                                    class="waves-effect waves-green btn-floating green white-text waves-circle"><i
+                                <a href="{% url 'login' %}" class="waves-effect waves-green btn-floating green white-text waves-circle"><i
                                         class="material-icons">send</i></a>
-                                <a id="cancel-login-btn" href="#"
-                                    class="waves-effect waves-green btn-floating red white-text waves-circle"><i
+                                <a id="cancel-login-btn" href="#" class="waves-effect waves-green btn-floating red white-text waves-circle"><i
                                         class="material-icons">cancel</i></a>
                             </form>
                         </li>
                         <li><a id="login-btn" class="waves-effect waves-light green btn w3-round-large">Login</a></li>
+                        {% endif %}
                     </ul>
                 </div>
             </nav>
@@ -59,20 +69,38 @@
                 <div class="user-view">
                     <div class="background light-blue">
                     </div>
+                    {% if user.is_authenticated %}
                     <img class="circle responsive-img" src="{{ MEDIA_URL }}profile_images/rango.jpg">
-                    <span class="black-text name">Rango De Django</span>
-                    <span class="black-text email">2945868d@student.gla.ac.uk</span>
+                    <span class="black-text name">ZainSra</span>
+                    <span class="black-text email">2418596u@student.gla.ac.uk</span>
+                    {% else %}
+                    <img class="circle responsive-img" src="{{ MEDIA_URL }}profile_images/rango.jpg">
+                    <span class="black-text name">Guest</span>
+                    <span class="black-text email"></span>
+                    {% endif %}
                 </div>
             </li>
-            <li><a href="#" class="waves-effect waves-green"><i class="material-icons">home</i> Home</a></li>
+            <li><a href="{% url 'index' %}" class="waves-effect waves-green"><i class="material-icons">home</i> Home</a></li>
             <li>
                 <div class="divider"></div>
             </li>
-            <li><a href="#" class="waves-effect waves-green"><i class="material-icons">person</i> Profile</a></li>
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'dashboard' %}" class="waves-effect waves-green"><i class="material-icons">dashboard</i> Dashboard</a></li>
             <li>
                 <div class="divider"></div>
             </li>
-            <li><a href="#" class="waves-effect waves-green"><i class="material-icons">exit_to_app</i> Logout</a></li>
+            <li><a href="{% url 'profile' %}" class="waves-effect waves-green"><i class="material-icons">person</i> Profile</a></li>
+            <li>
+                <div class="divider"></div>
+            </li>
+            <li><a href="{%url 'logout' %}" class="waves-effect waves-green"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            {% else %}
+            <li><a href="{% url 'register' %}" class="waves-effect waves-green"><i class="material-icons">person_add</i> Sign Up</a></li>
+            <li>
+                <div class="divider"></div>
+            </li>
+            <li><a href="{% url 'login' %}" class="waves-effect waves-green"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+             {% endif %}
         </ul>
     </header>
 
@@ -86,15 +114,14 @@
             &copy; 2019 BO1028
         </div>
         <div class="footer-text">
-            <a href="#">About</a>
+            <a href="{%url 'about' %}">About</a>
             |
-            <a href="#">Contact</a>
+            <a href="{% url 'contact' %}">Contact</a>
         </div>
     </div>
-
     <!-- Compiled and minified JavaScript -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="{% static 'eventually/index.js' %}"></script>
 
