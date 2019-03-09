@@ -1,38 +1,89 @@
 {% extends 'eventually/base.html' %}
 {% load staticfiles %}
 
-{% block title_block %}
-Index
-{% endblock %}
-{% block event_css %}
-<link href="{% static 'eventually/css/event.css' %}" type="text/css" rel="stylesheet" />
-{% endblock %}
-
 {% block css_block %}
-<link rel="stylesheet" href="/maps/documentation/javascript/cgc/demos.css">
+<link href="{% static 'eventually/css/event.css' %}" type="text/css" rel="stylesheet" />
+<style>
+  #map {
+    height: 300px;
+    width: 300px;
+  }
+</style>
 {% endblock %}
 
-{% block body_block %}
-    <div class="card"><div class="card-content"><div id="map"></div></div></div>
-    <script>
-      function initMap() {
-        var myLatLng = {lat: -25.363, lng: 131.044};
+{% block title_block %}
+Event
+{% endblock %}
 
-        // Create a map object and specify the DOM element
-        // for display.
-        var map = new google.maps.Map(document.getElementById('map'), {
-          center: myLatLng,
-          zoom: 4
-        });
+{% block jumbotron%}
+<div class="jumbotron-wrapper" style="background-image: url({% static 'images/background.jpg' %});">
+  {% endblock %}
 
-        // Create a marker and set its position.
-        var marker = new google.maps.Marker({
-          map: map,
-          position: myLatLng,
-          title: 'Hello World!'
-        });
-      }
+  {% block body_block %}
 
-    </script>
+  <!-- Event images, details, comments and map (Using CSS Flexbox)-->
+  <main>
+    <div class="main-container">
+      <div class="heading w3-animate-zoom">
+          <div style="display: flex;">
+              <div class="card" style="flex: 2; overflow-y: scroll;">
+                <div class="card-content">
+                  <div class="card-title">Event name</div>
+                  
+            
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-content" style="display: flex; align-items: center;">
+                    <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fzainsrawrites&tabs=timeline%2Cevents&width=340&height=500&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="360" height="400" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true" allow="encrypted-media"></iframe>
+                </div>
+              </div>
+            </div>
+      </div>
+      <div class="contact-host-bar">
+      <!-- Modal Trigger -->
+      <a id="contact-host-btn" class="btn-floating pulse btn blue modal-trigger" data-target="contact-host"><i class="material-icons large">share</i></a>
+    </div>
+    <!-- Modal Structure -->
+    <div id="contact-host" class="modal modal-fixed-footer">
+      <div class="modal-content">
+        <h4>Contact host</h4>
+        <div class="row">
+            <form class="col s12">
+              <div class="row">
+                <div class="input-field col s12">
+                  <textarea id="textarea1" class="materialize-textarea"></textarea>
+                  <label for="textarea1">Message</label>
+                </div>
+              </div>
+            </form>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-red btn-flat">CANCEL</a>
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">SEND</a>
+      </div>
+    </div>
+    </div>
+</div> <!-- End of Jumbotron wrapper -->
+<div style="display: flex; height: 370px;">
+  <div class="card" style="flex: 2; overflow-y: scroll;">
+    <div class="card-content">
+      <div class="card-title">Comment Section</div>
 
+      <div id="disqus_thread"></div>
+      <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments
+          section.</a></noscript>
+
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-content" style="display: flex; align-items: center;">
+      <div id="map"></div>
+    </div>
+  </div>
+</div>
+
+<div id="fb-root"></div>
+</main>
 {% endblock %}
