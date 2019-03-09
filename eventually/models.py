@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     max_length = 200
     user = models.OneToOneField(User)
-    profile_pic = models.ImageField(upload_to='profile_images', blank=True)
+    profile_pic = models.URLField()
     ver_code = models.CharField(max_length=6)
     approved = models.BooleanField(default=False)
 
@@ -18,7 +18,7 @@ class Event(models.Model):
     max_length = 200
     title = models.CharField(max_length=max_length)
     description = models.CharField(max_length=max_length * 5)
-    image = models.ImageField(upload_to='event_images', blank=True)
+    image = models.URLField()
     location = models.CharField(max_length=max_length * 3)  # GPS Coordinates
     address = models.CharField(max_length=max_length * 5)   # Actual Address
     date = models.DateField(auto_now=False)
@@ -38,7 +38,6 @@ class Attendee(models.Model):
 
     def __str__(self):
         return self.user.user.username + " -> " + self.event.title
-
 
 class Tag(models.Model):
     max_length = 200
