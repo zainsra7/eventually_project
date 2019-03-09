@@ -1,35 +1,50 @@
+import cloudinary
 from django.http import HttpResponse
 from django.shortcuts import render
+from PIL import Image
 from eventually.forms import UserForm, UserProfileForm
 
+cloudinary.config(
+    cloud_name='eventually',
+    api_key='398391779669939',
+    api_secret='B9r_lNfKaNy2Z8bK3d9wDksxhOs'
+)
+
+
 def index(request):
-    #Fetch Popular Events from Database
+    # Fetch Popular Events from Database
     events = range(5)
     context_dict = {'events': events, }
     response = render(request, 'eventually/index.html', context=context_dict)
     return response
 
+
 def dashboard(request):
     return HttpResponse("Dashboard: Showing User's Events + Search bar/Filtering")
-    
+
+
 def search(request):
     return HttpResponse("Search Page showing all events based on search string")
-    
+
+
 def host(request):
     return HttpResponse("Host Event Page to create an event")
-    
+
+
 def event(request):
     return render(request, 'eventually/event.html', {})
-    
+
+
 def profile(request):
     return HttpResponse("Profile page to edit user profile")
+
 
 def register(request):
     # Successful registration check
     registered = False
 
     if request.method == 'POST':
-        
+
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileForm(data=request.POST)
 
@@ -49,13 +64,25 @@ def register(request):
 
             # Add profile picture to UserProfile model if provided by user
             if 'profile_pic' in request.FILES:
-                profile.profile_pic = request.FILES['picture']
+                # Verifying if the uploaded file is valid image (using Pillow)
+                image = Image.open(request.FILES['profile_pic'])
+                try:
+                    image.verify()
 
-            # Save the UserProfile model instance
-            profile.save()
+                    # Uploading Photo to Cloudinary in "user_photo" folder with id of username
+                    response = cloudinary.uploader.upload(request.FILES['profile_pic'],
+                                                      folder="user_photo/",
+                                                      public_id=user.username)
+                    profile.profile_pic = response['secure_url']
 
-            # Indicate that registration was successful
-            registered = True
+                    # Save the UserProfile model instance
+                    profile.save()
+
+                    # Indicate that registration was successful
+                    registered = True
+
+                except Exception:
+                    print('Invalid image')
 
         else:
             # Print problems to the terminal in case of invalid forms
@@ -71,14 +98,18 @@ def register(request):
                                                         'profile_form': profile_form,
                                                         'registered': registered})
 
+
 def logout(request):
     return HttpResponse("Logout")
+
 
 def login(request):
     return HttpResponse("Login")
 
+
 def about(request):
     return HttpResponse("About Us page showing information about Eventually")
+
 
 def contact(request):
     return HttpResponse("Contact us page showing Team behind Eventually")
