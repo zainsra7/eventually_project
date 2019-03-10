@@ -21,13 +21,16 @@ def index(request):
 
 def dashboard(request):
     #Fetch Popular Events from Database
-    events = range(5)
+    events = range(9)
     context_dict = {'events': events, }
     response = render(request, 'eventually/dashboard.html', context=context_dict)
     return response
     
 def search(request):
-    return HttpResponse("Search Page showing all events based on search string")
+    events = range(5)
+    context_dict = {'events': events, }
+    response = render(request, 'eventually/search.html', context=context_dict)
+    return response
 
 
 def host(request):

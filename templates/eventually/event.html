@@ -3,12 +3,6 @@
 
 {% block css_block %}
 <link href="{% static 'eventually/css/event.css' %}" type="text/css" rel="stylesheet" />
-<style>
-  #map {
-    height: 300px;
-    width: 300px;
-  }
-</style>
 {% endblock %}
 
 {% block title_block %}
@@ -21,53 +15,84 @@ Event
 
   {% block body_block %}
 
-  <!-- Event images, details, comments and map (Using CSS Flexbox)-->
+  <!-- Event image, details, comments and map (Using CSS Flexbox)-->
   <main>
-    <div class="main-container">
-      <div class="heading w3-animate-zoom">
-          <div style="display: flex;">
-              <div class="card" style="flex: 2; overflow-y: scroll;">
-                <div class="card-content">
-                  <div class="card-title">Event name</div>
-                  
-            
-                </div>
-              </div>
-              <div class="card">
-                <div class="card-content" style="display: flex; align-items: center;">
-                    <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fzainsrawrites&tabs=timeline%2Cevents&width=340&height=500&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="360" height="400" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true" allow="encrypted-media"></iframe>
-                </div>
-              </div>
+    <div class="heading w3-animate-zoom">
+
+      <!-- Event details -->
+      <div class="row" id="details-facebook">
+        <div id="event-details" class="col s8 card">
+          <div class="date">
+            <span class="day">07</span>
+            <span class="month">Dec</span>
+            <span class="year">2019</span>
+          </div>
+          <div id="event-info" class="card-content">
+
+            <div class="card-title">Event name</div>
+
+            <p><i class="material-icons">event_note</i> <b>Description:
+              </b>hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+            </p>
+            <p><i class="material-icons">access_time</i> <b>Time: </b></p>
+            <p><i class="material-icons">location_on</i> <b>Location: </b></p>
+            <p><i class="material-icons">group</i> <b>Attendees: </b></p>
+
+            <div id="join-btn">
+              <button class="waves-effect waves-light-green btn w3-hover-black" href="#">Join event</button>
             </div>
+          </div>
+        </div>
+
+        <!-- Facebook plugin -->
+        <div id="event-facebook" class="col s4 card">
+          <div class="card-content">
+            <iframe
+              src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fzainsrawrites&tabs=timeline%2Cevents&width=340&height=500&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=true&appId"
+              height="400" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true"
+              allow="encrypted-media"></iframe>
+          </div>
+        </div>
       </div>
-      <div class="contact-host-bar">
-      <!-- Modal Trigger -->
-      <a id="contact-host-btn" class="btn-floating pulse btn blue modal-trigger" data-target="contact-host"><i class="material-icons large">share</i></a>
     </div>
+
+
+    <!-- Contact host -->
+    <div class="contact-host-bar">
+      <!-- Modal Trigger -->
+      <a id="contact-host-btn" class="btn-floating pulse btn blue modal-trigger" data-target="contact-host"><i
+          class="material-icons large">mail</i></a>
+    </div>
+
     <!-- Modal Structure -->
     <div id="contact-host" class="modal modal-fixed-footer">
       <div class="modal-content">
         <h4>Contact host</h4>
         <div class="row">
-            <form class="col s12">
-              <div class="row">
-                <div class="input-field col s12">
-                  <textarea id="textarea1" class="materialize-textarea"></textarea>
-                  <label for="textarea1">Message</label>
-                </div>
+          <form class="col s12">
+            <div class="row">
+              <div class="input-field col s12">
+                <textarea id="message" class="materialize-textarea"></textarea>
+                <label for="message">Message</label>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
+        </div>
       </div>
+
       <div class="modal-footer">
         <a href="#!" class="modal-close waves-effect waves-red btn-flat">CANCEL</a>
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">SEND</a>
       </div>
+
     </div>
-    </div>
-</div> <!-- End of Jumbotron wrapper -->
-<div style="display: flex; height: 370px;">
-  <div class="card" style="flex: 2; overflow-y: scroll;">
+</div>
+
+
+<div id="comment-map">
+
+  <!-- Comment section -->
+  <div id="comment-section" class="card">
     <div class="card-content">
       <div class="card-title">Comment Section</div>
 
@@ -77,13 +102,12 @@ Event
 
     </div>
   </div>
+
+  <!-- Map -->
   <div class="card">
-    <div class="card-content" style="display: flex; align-items: center;">
+    <div class="card-content">
       <div id="map"></div>
     </div>
   </div>
 </div>
-
-<div id="fb-root"></div>
-</main>
 {% endblock %}
