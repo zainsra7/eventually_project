@@ -47,8 +47,8 @@ Search
 
 <!-- Events -->
 <div class="container" id="events-container">
-    {% if events %}
-    {% for event in events %}
+    {% if event %}
+    {% for e in event %}
 
     <div class="col s12 m7 w3-animate-zoom">
         <a href="{% url 'event'%}">

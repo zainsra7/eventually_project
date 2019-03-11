@@ -5,6 +5,7 @@ from django.shortcuts import render
 from eventually.forms import UserForm, UserProfileForm, ProfileForm
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from eventually.models import UserProfile
+from eventually.models import Event
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
@@ -33,8 +34,12 @@ def dashboard(request):
     return response
     
 def search(request):
-    events = range(5)
-    context_dict = {'events': events, }
+    context_dict = {}
+    try:
+        event = Event.objects.order_by('-date')
+        context_dict['event'] = event
+    except Event.DoesNotExist:
+        context_dict['event'] = None
     response = render(request, 'eventually/search.html', context=context_dict)
     return response
 
