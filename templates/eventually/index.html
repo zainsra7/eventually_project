@@ -5,6 +5,10 @@
 Index
 {% endblock %}
 
+{% block css_block %}
+<link href="{% static 'eventually/css/index.css' %}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
 {% block jumbotron%}
 <div class = "jumbotron-wrapper" style="background-image: url({% static 'images/background.jpg' %});">
 {% endblock %}

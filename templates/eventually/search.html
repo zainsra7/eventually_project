@@ -1,0 +1,93 @@
+{% extends 'eventually/base.html' %}
+{% load staticfiles %}
+
+{% block css_block %}
+<link href="{% static 'eventually/css/search.css' %}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block title_block %}
+Search
+{% endblock %}
+
+{% block body_block %}
+
+<!-- Search bar -->
+<nav class="container white" id="search-container">
+
+    <div class="nav-wrapper w3-animate-left" style="flex: 2">
+        <form>
+            <div class="input-field">
+                <input id="search" type="search" placeholder="Search for event name, tags, location" required>
+                <label class="label-icon" for="search"><i class="material-icons grey-text">search</i></label>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filter dropdown trigger -->
+    <a class='dropdown-button btn w3-animate-right' href='#' data-target='filter'>Filter</a>
+
+    <!-- Filter dropdown structure -->
+    <ul id='filter' class='dropdown-content'>
+        <li><a href="#!">Upcoming</a></li>
+        <li><a href="#!">Past</a></li>
+        <li><a href="#!">All</a></li>
+    </ul>
+
+    <!-- Sort dropdown trigger -->
+    <a class='dropdown-button btn w3-animate-right' href='#' data-target='sort'>Sort</a>
+
+    <!-- Sort dropdown structure -->
+    <ul id='sort' class='dropdown-content'>
+        <li><a href="#!">Date</a></li>
+        <li><a href="#!">Popularity</a></li>
+    </ul>
+
+</nav>
+
+
+<!-- Events -->
+<div class="container" id="events-container">
+    {% if events %}
+    {% for event in events %}
+
+    <div class="col s12 m7 w3-animate-zoom">
+        <a href="{% url 'event'%}">
+            <div class="card horizontal">
+                <div class="date">
+                    <span class="day">07</span>
+                    <span class="month">Dec</span>
+                    <span class="year">2019</span>
+                </div>
+                <div class="card-image">
+                    <img src="{% static 'images/background.jpg' %}">
+                </div>
+                <div class="card-stacked">
+                    <div class="card-content">
+                        <div class="card-title">Event name</div>
+                        <p><i class="material-icons">location_on</i> <b>Location: </b></p>
+                        <p><i class="material-icons">group</i> <b>Attendees: </b></p>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+    {% else %}
+    No events
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+<div class="container w3-animate-zoom" id="pagination-container">
+    <ul class="pagination">
+        <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
+        <li class="active blue-grey"><a href="#!">1</a></li>
+        <li class="waves-effect"><a href="#!">2</a></li>
+        <li class="waves-effect"><a href="#!">3</a></li>
+        <li class="waves-effect"><a href="#!">4</a></li>
+        <li class="waves-effect"><a href="#!">5</a></li>
+        <li class="waves-effect"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+    </ul>
+</div>
+
+{% endblock %}

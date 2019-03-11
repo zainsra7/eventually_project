@@ -5,32 +5,26 @@ html {
 }
 
 /* Hero Pattern Background */
-.background, #login_form, .host_src_bar, .footer, body {
-    background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
+.background, #login_form, .host_src_bar, .footer, body{
+  background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
   }
 
-body, .background{
-    background-color: whitesmoke;
-}
-
-#slide-out,
-body {
-  display: flex;
-  flex-direction: column;
-}
-
-i {
-  color: black;
+body{
+  background-color: whitesmoke;
 }
 
 /* NavBar */
-.nav-wrapper {
+#base-navbar {
   padding-left: 12px;
   background-image: linear-gradient(to top, transparent, white 100%, white 50%, white 50%);
 }
 
 .brand-logo{
   margin-top: -5px;
+}
+
+.background{
+  background-color: #2196F3;
 }
 
 #login-form{
@@ -45,9 +39,10 @@ i {
     bottom: 0;
     width: 100%;
     text-align: center;
-    color: white
+    color: white;
+    height: 80px;
   }
-  
-  .footer-text {
+
+.footer-text {
     font-size: 15px;
   }
