@@ -9,6 +9,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 
+from django.core.mail import send_mail, EmailMultiAlternatives
+
+from eventually.forms import UserForm, UserProfileForm
+import random
+
+import io
+
+from eventually.models import UserProfile
 
 cloudinary.config(
     cloud_name='eventually',
@@ -24,19 +32,22 @@ def index(request):
     response = render(request, 'eventually/index.html', context=context_dict)
     return response
 
+
 @login_required
 def dashboard(request):
-    #Fetch Popular Events from Database
+    # Fetch Popular Events from Database
     events = range(9)
     context_dict = {'events': events, }
     response = render(request, 'eventually/dashboard.html', context=context_dict)
     return response
-    
+
+
 def search(request):
     events = range(5)
     context_dict = {'events': events, }
     response = render(request, 'eventually/search.html', context=context_dict)
     return response
+
 
 @login_required
 def host(request):
@@ -45,6 +56,7 @@ def host(request):
 
 def event(request):
     return render(request, 'eventually/event.html', {})
+
 
 @login_required
 def profile(request):
@@ -75,8 +87,8 @@ def profile(request):
                 if '.jpg' in picture.name or '.png' in picture.name:
                     # Uploading Photo to Cloudinary in "user_photo" folder with id of username
                     response = cloudinary.uploader.upload(request.FILES['profile_pic'],
-                                                    folder="user_photo/",
-                                                    public_id=user.username)
+                                                          folder="user_photo/",
+                                                          public_id=user.username)
                     user_profile.profile_pic = response['secure_url']
                 else:
                     profile_update = False
@@ -89,7 +101,7 @@ def profile(request):
                 # Save user profile form date to database
                 user_profile.user = user
                 user_profile.save(update_fields=['user', 'profile_pic'])
-                profile_update = True # Indicate that profile  was updated successfully
+                profile_update = True  # Indicate that profile  was updated successfully
         else:
             # Print problems to the terminal in case of invalid forms
             print(user_form.errors, profile_form.errors)
@@ -100,10 +112,14 @@ def profile(request):
 
     # Render template depending on the context.
     return render(request, 'eventually/profile.html', {'user_form': user_form,
-                                                        'profile_form': profile_form,
-                                                        'profile_update': profile_update,
-                                                        'image_error': image_error})
+                                                       'profile_form': profile_form,
+                                                       'profile_update': profile_update,
+                                                       'image_error': image_error})
 
+
+# Sign Up flow 1. Show user form for registration 2. Validate form upon submission and return errors if any 3. If
+# there are no errors after submission, update user's database and send a mail to user's mail with verification code.
+# Redirect to view for email validation
 def register(request):
     # Successful registration check
     registered = False
@@ -113,16 +129,21 @@ def register(request):
 
     if request.method == 'POST':
 
+        password = request.POST.get('password')
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileForm(data=request.POST)
+
+        request.session['password'] = password
 
         # Check if forms are valid
         if user_form.is_valid() and profile_form.is_valid():
             # Save user's form data to database
             user = user_form.save(commit=False)
-
+            user.set_password(password)
             # Save user profile form date to database
             user_profile = profile_form.save(commit=False)
+            user_profile.approved = False
+            user_profile.user = user
             save_profile = True
 
             if 'profile_pic' in request.FILES:
@@ -130,8 +151,8 @@ def register(request):
                 if '.jpg' in picture.name or '.png' in picture.name:
                     # Uploading Photo to Cloudinary in "user_photo" folder with id of username
                     response = cloudinary.uploader.upload(request.FILES['profile_pic'],
-                                                      folder="user_photo/",
-                                                      public_id=user.username)
+                                                          folder="user_photo/",
+                                                          public_id=user.username)
                     user_profile.profile_pic = response['secure_url']
                 else:
                     save_profile = False
@@ -141,13 +162,20 @@ def register(request):
                 user_profile.profile_pic = static('images/rango.jpg')
 
             if save_profile:
+
+                # Generate verification code and send to the user's email address
+                user_profile.ver_code = generate_random_code()
+                send_mail_api(user_profile.user.username, user_profile.user.email, user_profile.ver_code)
+
                 # Hash password and save user object
-                user.set_password(user.password)
+                # user.set_password(user.password)
                 user.save()
                 user_profile.user = user
                 user_profile.save()
-                registered = True # Indicate that Registration was successful
-                return HttpResponseRedirect(reverse('index'))
+                # save user profile id to session
+                request.session['profile_id'] = user.id
+
+                return HttpResponseRedirect(reverse('account_confirmation'))
         else:
             # Print problems to the terminal in case of invalid forms
             print(user_form.errors, profile_form.errors)
@@ -162,12 +190,15 @@ def register(request):
                                                         'registered': registered,
                                                         'image_error': image_error})
 
+
 @login_required
 def user_logout(request):
     # Since we know the user is logged in, we can now just log them out.
     logout(request)
     # Take the user back to the homepage
     return HttpResponseRedirect(reverse('index'))
+
+
 
 
 def user_login(request):
@@ -202,7 +233,7 @@ def user_login(request):
                 return HttpResponse("Your Eventually account is disabled.")
         else:
             # Bad login details were provided, So we can't log the user in
-            print("Invalid login details: {0}, {1}".format(username,password))
+            print("Invalid login details: {0}, {1}".format(username, password))
             return HttpResponse("Invalid login details supplied.")
 
     # The request is not HTTP POST, so display the login form
@@ -210,7 +241,8 @@ def user_login(request):
     else:
         # No context variables to pass to the template system, hence the
         # blank dictionary object
-        return render(request,'eventually/index.html', {})
+        return render(request, 'eventually/index.html', {})
+
 
 def about(request):
     return HttpResponse("WHY")
@@ -266,53 +298,9 @@ def user_login(request):
                 login(request, user)
                 return HttpResponseRedirect(reverse('index'))
         else:
-            return render(request, 'eventually/login.html', {'error':'Login failed. Please check your login details'})
+            return render(request, 'eventually/login.html', {'error': 'Login failed. Please check your login details'})
 
     return render(request, 'eventually/login.html', {})
-
-
-# Sign Up flow 1. Show user form for registeration 2. Validate form upon submission and return errors if any 3. If
-# there are no errors after submission, update user's database and send a mail to user's mail with verification code.
-# Redirect to view for email validation
-def register(request):
-    if request.method == 'POST':
-        print(request.POST)
-        user_form = UserForm(data=request.POST)
-        profile_form = UserProfileForm(data=request.POST)
-
-        password = request.POST.get('password')
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            user.set_password(password)
-            request.session['password'] = password
-            user.save()
-
-            profile = profile_form.save(commit=False)
-            profile.user = user
-
-            if 'picture' in request.FILES:
-                profile.picture = request.FILES['picture']
-                profile.approved = False
-
-            # Generate verification code and send to the user's email address
-            profile.ver_code = generate_random_code()
-            profile.save()
-            send_mail_api(profile.user.username, profile.user.email, profile.ver_code)
-
-            # save user profile id to session
-            request.session['profile_id'] = user.id
-
-            return HttpResponseRedirect(reverse('account_confirmation'))
-
-        else:
-            print(user_form.errors, profile_form.errors)
-    else:
-        user_form = UserForm()
-        profile_form = UserProfileForm()
-
-    return render(request, 'eventually/register.html', {'user_form': user_form,
-                                                        'profile_form': profile_form,
-                                                        })
 
 
 def contact(request):
@@ -361,10 +349,10 @@ def forgot_password(request):
             return HttpResponseRedirect(reverse('password_reset'))
         except User.DoesNotExist:
             return render(request, 'eventually/forgot_password.html',
-                              {'error': 'Email address is incorrect'})
+                          {'error': 'Email address is incorrect'})
         except UserProfile.DoesNotExist:
             return render(request, 'eventually/forgot_password.html',
-                              {'error': 'Email address is incorrect'})
+                          {'error': 'Email address is incorrect'})
 
     return render(request, 'eventually/forgot_password.html', {})
 
@@ -383,7 +371,7 @@ def password_reset(request):
                 if profile.ver_code == ver_code:
                     user.set_password(password)
                     user.save()
-                    return render(request, 'eventually/index.html', {'user':user})
+                    return render(request, 'eventually/index.html', {'user': user})
                 else:
                     return render(request, 'eventually/forgot_password_confirmation.html',
                                   {'error': 'Verification code is incorrect'})
@@ -392,7 +380,7 @@ def password_reset(request):
                               {'error': 'Email address is incorrect'})
         except User.DoesNotExist:
             return render(request, 'eventually/forgot_password_confirmation.html',
-                              {'error': 'Email address is incorrect'})
+                          {'error': 'Email address is incorrect'})
 
     return render(request, 'eventually/forgot_password_confirmation.html', {})
 
