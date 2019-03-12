@@ -13,5 +13,5 @@ urlpatterns = [
     url(r'^search/',views.search,name='search'),
     url(r'^host/$',views.host, name='host'),
     url(r'^event/',views.event, name='event'),
-    url(r'^account_confirmation/$',views.host, name='account_confirmation'),
+    url(r'^account_confirmation/$',views.account_confirmation, name='account_confirmation'),
 ]
