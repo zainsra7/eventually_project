@@ -162,7 +162,6 @@ def register(request):
                 user_profile.profile_pic = static('images/rango.jpg')
 
             if save_profile:
-
                 # Generate verification code and send to the user's email address
                 user_profile.ver_code = generate_random_code()
                 send_mail_api(user_profile.user.username, user_profile.user.email, user_profile.ver_code)
@@ -172,9 +171,8 @@ def register(request):
                 user.save()
                 user_profile.user = user
                 user_profile.save()
-                # save user profile id to session
-                request.session['profile_id'] = user.id
 
+                print('Account confirmation')
                 return HttpResponseRedirect(reverse('account_confirmation'))
         else:
             # Print problems to the terminal in case of invalid forms
@@ -199,8 +197,6 @@ def user_logout(request):
     return HttpResponseRedirect(reverse('index'))
 
 
-
-
 def user_login(request):
     # If the request is a HTTP POST, try to pull out the relevant information
     if request.method == 'POST':
@@ -218,12 +214,20 @@ def user_login(request):
         # combination is valid - a User object is returned if it is
         user = authenticate(username=username, password=password)
 
+        profile = UserProfile.objects.get(user=user)
+
+
         # If we have a User object, the details are correct.
         # If None (Python's way of representing the absence of a value), no user
         # with matching crendentials was found
         if user:
+            if profile.approved is False:
+                # save user profile id to session
+                request.session['profile_id'] = user.id
+                request.session['password'] = password
+                return HttpResponseRedirect(reverse('account_confirmation'))
             # Is the account active? It could have been disabled
-            if user.is_active:
+            elif user.is_active:
                 # If the account is valid and active, we can log the user in
                 # We'll send the user back to the homepage
                 login(request, user)
@@ -267,7 +271,7 @@ def account_confirmation(request):
                 print(user.username, user.password)
                 user.active = True
                 user.save()
-                logged_in_user = authenticate(request, username=user.username, password=user.password)
+                logged_in_user = authenticate(request, username=user.username, password=password)
                 print(logged_in_user)
 
                 if logged_in_user:
@@ -286,22 +290,6 @@ def account_confirmation(request):
     return render(request, 'eventually/account_confirmation.html', {})
 
 
-def user_login(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
-        user = authenticate(username=username, password=password)
-
-        if user:
-            if user.is_active:
-                login(request, user)
-                return HttpResponseRedirect(reverse('index'))
-        else:
-            return render(request, 'eventually/login.html', {'error': 'Login failed. Please check your login details'})
-
-    return render(request, 'eventually/login.html', {})
-
 
 def contact(request):
     return HttpResponse("Contact us page showing Team behind Eventually")
@@ -318,7 +306,7 @@ def send_mail_api(username, email, ver_code):
     print(username, email, ver_code)
     subject, from_email, to = 'Verification Code', 'events@eventually.com', email
     text_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
-    html_content = '<strong>Let us see if this works</strong>'
+    html_content = "<strong>Dear %s, \nPlease enter your verification code: %s </strong>" % (username, ver_code)
     message = EmailMultiAlternatives(subject, text_content, from_email, [to])
     message.attach_alternative(html_content, "text/html")
     message.send()
