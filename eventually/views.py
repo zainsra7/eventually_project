@@ -271,10 +271,9 @@ def user_login(request):
     return render(request, 'eventually/login.html', {})
 
 
-# Sign Up flow
-# 1. Show user form for registeration
-# 2. Validate form upon submission and return errors if any
-# 3. If there are no errors after submission, update user's database and send a mail to user's mail with verification code. Redirect to view for email validation
+# Sign Up flow 1. Show user form for registeration 2. Validate form upon submission and return errors if any 3. If
+# there are no errors after submission, update user's database and send a mail to user's mail with verification code.
+# Redirect to view for email validation
 def register(request):
     if request.method == 'POST':
         print(request.POST)
