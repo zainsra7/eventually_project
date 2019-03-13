@@ -33,6 +33,11 @@ body{
   display:none;
 }
 
+/* Login Modal */
+.login-modal-content{
+  max-width: 600px;
+}
+
 /* Footer */
 .footer {
     left: 0;

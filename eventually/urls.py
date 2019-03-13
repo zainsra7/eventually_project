@@ -14,4 +14,5 @@ urlpatterns = [
     url(r'^host/$',views.host, name='host'),
     url(r'^event/(?P<event_id>[\w\-]+)/$',views.event, name='event'),
     url(r'^join/$',views.join_event, name='join_event'),
+    url(r'^forget_password/$', views.forget_password, name="forget_password")
 ]

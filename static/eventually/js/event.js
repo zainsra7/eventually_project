@@ -28,7 +28,7 @@ function geocodeAddress(geocoder, map) {
     geocoder.geocode({
         componentRestrictions: {
             country: 'UK',
-            postalCode: 'G128RZ'
+            postalCode: 'G116DN'
         }
     }, function (results, status) {
         if (status === 'OK') {
