@@ -2,7 +2,7 @@ import cloudinary
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from eventually.forms import UserForm, UserProfileForm, ProfileForm
+from eventually.forms import UserForm, UserProfileForm, ProfileForm, EventForm
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from eventually.models import UserProfile
 from django.contrib.auth.models import User
@@ -24,7 +24,6 @@ def index(request):
     response = render(request, 'eventually/index.html', context=context_dict)
     return response
 
-@login_required
 def dashboard(request):
     #Fetch Popular Events from Database
     events = range(9)
@@ -38,9 +37,25 @@ def search(request):
     response = render(request, 'eventually/search.html', context=context_dict)
     return response
 
-@login_required
 def host(request):
-    return HttpResponse("Host Event Page to create an event")
+    # Successful create_event check
+    event_created = False
+
+    # To display error if the uploaded picture is not valid
+    image_error = ""
+
+    if request.method == "POST":
+        event_form = EventForm(data=request.POST)
+
+        if event_form.is_valid():
+            event = event_form.save(commit=False)
+        else:
+            print(event_form.errors)
+    else:
+        # Return a blank form
+        event_form = EventForm()
+        print(event_form)
+    return render(request,'eventually/host.html',{"event_form": event_form})
 
 
 def event(request):
@@ -73,7 +88,7 @@ def profile(request):
             if 'profile_pic' in request.FILES:
                 picture = request.FILES['profile_pic']
                 if '.jpg' in picture.name or '.png' in picture.name:
-                    # Uploading Photo to Cloudinary in "user_photo" folder with id of username
+                    # Uploading Photo to Cloudinary in "user_photo" folder with id of username, it updates and replaces old version of file
                     response = cloudinary.uploader.upload(request.FILES['profile_pic'],
                                                     folder="user_photo/",
                                                     public_id=user.username)
@@ -88,7 +103,7 @@ def profile(request):
                 user.save(update_fields=['password'])
                 # Save user profile form date to database
                 user_profile.user = user
-                user_profile.save(update_fields=['user', 'profile_pic'])
+                user_profile.save(update_fields=['user', 'profile_pic']) # Only update "user" and "profile_pic" field of UserProfile instance
                 profile_update = True # Indicate that profile  was updated successfully
         else:
             # Print problems to the terminal in case of invalid forms
@@ -211,6 +226,9 @@ def user_login(request):
         # No context variables to pass to the template system, hence the
         # blank dictionary object
         return render(request,'eventually/index.html', {})
+
+def forget_password(request):
+    return HttpResponse("Forget Password Page")
 
 def about(request):
     return HttpResponse("About Us page showing information about Eventually")

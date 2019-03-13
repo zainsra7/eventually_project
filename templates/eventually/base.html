@@ -45,25 +45,8 @@
                         <li><a href="{% url 'logout' %}" class="waves-effect waves-green  btn-floating red white-text waves-circle tooltipped" data-position="left" data-tooltip="Logout"><i
                                     class="material-icons">exit_to_app</i></a></li>
                         {% else %}
-                        <li><a id="signup-btn" href="{% url 'register' %}" class="waves-effect waves-light green btn w3-round-large">SignUp</a></li>
-                        <li>
-                            <form id="login-form" class="black w3-panel w3-leftbar w3-rightbar w3-border-blue" action="{% url 'login' %}" method="POST">
-                                {% csrf_token %}
-                                <div class="input-field inline">
-                                    <input id="username" type="text" name="username" class="validate white-text">
-                                    <label for="username">Username</label>
-                                </div>
-                                <div class="input-field inline">
-                                    <input id="password" type="password" name="password" class="validate white-text">
-                                    <label for="password">Password</label>
-                                </div>
-                                <a id="login_send" class="waves-effect waves-green btn-floating green white-text waves-circle"><i
-                                        class="material-icons">send</i></a>
-                                <a id="cancel-login-btn" href="#" class="waves-effect waves-green btn-floating red white-text waves-circle"><i
-                                        class="material-icons">cancel</i></a>
-                            </form>
-                        </li>
-                        <li><a id="login-btn" class="waves-effect waves-light green btn w3-round-large">Login</a></li>
+                        <li><a id="signup-btn" href="{% url 'register' %}" class="waves-effect w3-hover-black waves-light green btn w3-round-large">SignUp</a></li>
+                        <li><a class="login-btn waves-effect waves-light green btn w3-hover-black w3-round-large">Login</a></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -107,7 +90,7 @@
             <li>
                 <div class="divider"></div>
             </li>
-            <li><a href="{% url 'login' %}" class="waves-effect waves-green green"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+            <li><a class="login-btn waves-effect waves-green green"><i class="fas fa-sign-in-alt"></i> Login</a></li>
             {% endif %}
         </ul>
     </header>
@@ -116,6 +99,30 @@
     {% block body_block %}
     {% endblock %}
 
+    <!-- Login Modal -->
+    <div id="login-modal" class="w3-modal">
+        <div class="login-modal-content w3-modal-content w3-card-4 w3-animate-zoom">
+    
+          <div class="w3-center"><br>
+            <span class="cancel-btn w3-button w3-xlarge w3-hover-red w3-display-topright" title="Close Modal">&times;</span>
+          </div>
+    
+          <form class="w3-container" action="{% url 'login' %}" method="POST">
+              {% csrf_token %}
+            <div class="w3-section">
+              <label><b>Username</b></label>
+              <input class="w3-input w3-border w3-margin-bottom" type="text" placeholder="Enter Username" name="username" required>
+              <label><b>Password</b></label>
+              <input class="w3-input w3-border" type="password" placeholder="Enter Password" name="password" required>
+              <button class="w3-button w3-block w3-green w3-section w3-padding w3-hover-black" type="submit">Login</button>
+            </div>
+          </form>
+          <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+            <button type="button" class="cancel-btn w3-button w3-red">Cancel</button>
+            <span class="w3-right w3-padding">Forgot <a href="{% url 'forget_password' %}">password?</a></span>
+          </div>
+        </div>
+      </div>
     <!-- Footer -->
     <div class="footer blue">
         <div class="footer-text">
@@ -136,6 +143,7 @@
     <script src="{% static 'eventually/js/base.js' %}"></script>
     <script src="{% static 'eventually/js/index.js' %}"></script>
     <script src="{% static 'eventually/js/event.js' %}"></script>
+    <script src="{% static 'eventually/js/host.js' %}"></script>
     <script src="{% static 'eventually/js/search.js' %}"></script>
     <script src="{% static 'eventually/js/dashboard.js' %}"></script>
 </body>

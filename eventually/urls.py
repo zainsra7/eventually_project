@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^contact/$',views.contact, name='contact'),
     url(r'^search/',views.search,name='search'),
     url(r'^host/$',views.host, name='host'),
-    url(r'^event/',views.event, name='event')
+    url(r'^event/',views.event, name='event'),
+    url(r'^forget_password/$', views.forget_password, name="forget_password")
 ]
