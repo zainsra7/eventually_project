@@ -1,4 +1,5 @@
 import cloudinary
+import qrcode
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
@@ -145,10 +146,10 @@ def register(request):
                 users = User.objects.get(email=email_address)
             except MultipleObjectsReturned:
                 return render(request, 'eventually/register.html', {'user_form': user_form,
-                                                        'profile_form': profile_form,
-                                                        'registered': registered,
-                                                        'image_error': image_error,
-                                                        'email_error': 'Email address is already taken'})
+                                                                    'profile_form': profile_form,
+                                                                    'registered': registered,
+                                                                    'image_error': image_error,
+                                                                    'email_error': 'Email address is already taken'})
             except ObjectDoesNotExist:
                 # Save user's form data to database
                 user = user_form.save(commit=False)
@@ -244,6 +245,7 @@ def user_login(request):
                 # If the account is valid and active, we can log the user in
                 # We'll send the user back to the homepage
                 login(request, user)
+                send_events_qr_code(username, user.email, "Fresh events!", event_date="16/12/2019", event_venue="The Moon!")
                 return HttpResponseRedirect(reverse('index'))
             else:
                 # An inactive account was used - no logging in!
@@ -318,9 +320,51 @@ def send_mail_api(username, email, ver_code):
     print(username, email, ver_code)
     subject, from_email, to = 'Verification Code', 'events@eventually.com', email
     text_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
-    html_content = "<strong>Dear %s, \nPlease enter your verification code: %s </strong>" % (username, ver_code)
+    html_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
     message = EmailMultiAlternatives(subject, text_content, from_email, [to])
     message.attach_alternative(html_content, "text/html")
+    message.send()
+
+
+def send_mail_api(username, email, ver_code):
+    print(username, email, ver_code)
+
+    image = qrcode.make("This is Samuel's QR")
+    imageByteArray = io.BytesIO()
+    image.save(imageByteArray, format='PNG')
+    image_modified = imageByteArray.getvalue()
+
+    subject, from_email, to = 'Verification Code', 'events@eventually.com', email
+    text_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
+    html_content = '<strong>Let us see if this works</strong>'
+    message = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    message.attach_alternative(html_content, "text/html")
+
+    message.attach('sam.png', image_modified, 'image/png')
+    message.send()
+
+
+def send_events_qr_code(username, email, event_name, event_date, event_venue):
+    image = qrcode.make("Name : Sam. Event : Event 2")
+    imageByteArray = io.BytesIO()
+    image.save(imageByteArray, format='PNG')
+    image_modified = imageByteArray.getvalue()
+
+    subject, from_email, to = 'Ticket for %s ' % event_name, 'events@eventually.com', email
+    text_content = "Dear %s, Thanks for registering. Please contact customer care for ticket" % username
+    html_content = '<p>Dear %s, Thanks for registering for %s. Please find attached your special QR invitation. ' \
+                   'Scan ' \
+                   'this at the venue.<p> ' \
+                   '<br>' \
+                   '<br>' \
+                   '<strong>Event details</strong> <br>' \
+                   'Event Name : %s <br>' \
+                   'Event Date : %s <br>' \
+                   'Event Venue : %s <br>' % (username, event_name, event_name, event_date, event_venue)
+    message = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    message.attach_alternative(html_content, "text/html")
+
+    message.attach('sam.png', image_modified, 'image/png')
     message.send()
 
 
