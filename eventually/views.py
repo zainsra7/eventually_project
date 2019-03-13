@@ -5,10 +5,11 @@ from django.shortcuts import render
 from eventually.forms import UserForm, UserProfileForm, ProfileForm
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from eventually.models import UserProfile
-from eventually.models import Event
+from eventually.models import Event, Attendee
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 
 cloudinary.config(
@@ -17,11 +18,12 @@ cloudinary.config(
     api_secret='B9r_lNfKaNy2Z8bK3d9wDksxhOs'
 )
 
-
+##### need to sort by attendees
 def index(request):
     # Fetch Popular Events from Database
-    events = range(5)
-    context_dict = {'events': events, }
+    
+    events = Event.objects.order_by('-date')[:5]
+    context_dict = {'events': events}
     response = render(request, 'eventually/index.html', context=context_dict)
     return response
 
@@ -34,13 +36,27 @@ def dashboard(request):
     return response
     
 def search(request):
-    context_dict = {}
+    if request.method == 'POST':
+        search = request.POST['search']
+    else:
+        search = ''
+
+    event_list = Event.objects.filter(title__contains = search)
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(event_list, 5)
+
     try:
-        event = Event.objects.order_by('-date')
-        context_dict['event'] = event
+        events = paginator.page(page)
+    except PageNotAnInteger:
+        events = paginator.page(1)
+    except EmptyPage:
+        events = paginator.page(paginator.num_pages)
     except Event.DoesNotExist:
-        context_dict['event'] = None
-    response = render(request, 'eventually/search.html', context=context_dict)
+        events = None
+
+    
+    response = render(request, 'eventually/search.html', context={'events': events})
     return response
 
 @login_required
@@ -48,8 +64,48 @@ def host(request):
     return HttpResponse("Host Event Page to create an event")
 
 
-def event(request):
-    return render(request, 'eventually/event.html', {})
+def event(request, event_id):
+    context_dict = {}
+    try:
+        event = Event.objects.get(id=event_id)
+        attendees = Attendee.objects.filter(event=event).count()
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            joined = Attendee.objects.filter(event=event).filter(user=user_profile)
+        except:
+            joined = None
+
+        context_dict['event'] = event
+        context_dict['attendees'] = attendees
+        context_dict['joined'] = joined
+    except:
+        context_dict['event'] = None
+        context_dict['attendees'] = None
+        context_dict['joined'] = None
+
+    return render(request, 'eventually/event.html', context_dict)
+
+@login_required
+def join_event(request):
+    event_id = None
+
+    if request.method == 'GET':
+        event_id = request.GET['event_id']
+    
+    attendees = 0
+
+    if event_id:
+        event = Event.objects.get(id=int(event_id))
+    
+        if event:
+            user_profile = UserProfile.objects.get(user=request.user)
+
+            if user_profile:
+                attendee = Attendee(event=event, user=user_profile)
+                attendee.save()
+                attendees = Attendee.objects.filter(event=event).count()
+    
+    return HttpResponse(attendees)
 
 @login_required
 def profile(request):

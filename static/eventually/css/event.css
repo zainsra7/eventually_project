@@ -16,8 +16,7 @@ p {
   flex-direction: column;
   background-repeat: no-repeat;
   background-size: cover;
-  background-position-x: 20%;
-  background-position-y: 10%;
+  background-position: center center;
 }
 
 #details-facebook {
@@ -45,6 +44,10 @@ p {
   background-color:
   rgba(255, 255, 255, 0.8);
   border:none;
+}
+
+#does-not-exist {
+  text-align: center;
 }
 
 /* Date CSS by Pali Madra @CodePen*/
@@ -115,62 +118,4 @@ p {
   #details-facebook, #comment-map{   
     flex-direction: column;
   }
-}
-
-
-
-
-section .row{
-  display: inline;
-}
-
-section .title, .text{
-  background: url(images/text_background.png);
-  padding: 8px;
-}
-
-section .title{
-  margin-top: 30px;
-}
-
-section .text{
-  height: 400px;
-  padding: 30px;
-}
-
-section .text #news-text{
-  height: 260px;
-  overflow: hidden;
-  text-align: justify;
-}
-
-section .text #video-text{
-  overflow: hidden;
-  height: 340px;
-}
-
-section h2{
-  font-size: 16px;
-  text-align: center;
-}
-
-section h3{
-  font-size: 16px;
-  margin-top: 0;
-  border-bottom: 1px solid;
-}
-
-section .text iframe{
-  width: 100%; height: 100%;
-}
-
-section .text img{
-  margin-top: 5px;
-  margin-right: 10px;
-  float: left;
-}
-
-
-.span6{
- margin: 0 auto;
 }

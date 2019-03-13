@@ -10,7 +10,8 @@ urlpatterns = [
     url(r'^login/$',views.user_login, name='login'),
     url(r'^logout/$',views.user_logout, name='logout'),
     url(r'^contact/$',views.contact, name='contact'),
-    url(r'^search/',views.search,name='search'),
+    url(r'^search/$',views.search,name='search'),
     url(r'^host/$',views.host, name='host'),
-    url(r'^event/',views.event, name='event')
+    url(r'^event/(?P<event_id>[\w\-]+)/$',views.event, name='event'),
+    url(r'^join/$',views.join_event, name='join_event'),
 ]

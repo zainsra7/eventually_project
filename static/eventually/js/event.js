@@ -42,9 +42,19 @@ function geocodeAddress(geocoder, map) {
                 status);
         }
     });
-}
+};
 
 
 $(document).ready(function () {
     $('.modal').modal();
+
+    $('#join-button').click(function(){
+        var eventid;
+        eventid = $(this).attr("data-eventid");
+        $.get('/eventually/join/', {event_id: eventid}, function(data){
+            $('#attendee-count').html(data);
+            $('#join-button').addClass('blue');
+            $('#join-button').html('Joined');
+        });
+    });
 });
