@@ -14,4 +14,6 @@ urlpatterns = [
     url(r'^host/$',views.host, name='host'),
     url(r'^event/',views.event, name='event'),
     url(r'^account_confirmation/$',views.account_confirmation, name='account_confirmation'),
+    url(r'^forgot_password/$',views.forgot_password, name='forgot_password'),
+    url(r'^password_reset/$',views.password_reset, name='password_reset'),
 ]

@@ -1,4 +1,5 @@
 import cloudinary
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
@@ -130,6 +131,8 @@ def register(request):
     if request.method == 'POST':
 
         password = request.POST.get('password')
+        email_address = request.POST.get('email')
+
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileForm(data=request.POST)
 
@@ -137,43 +140,54 @@ def register(request):
 
         # Check if forms are valid
         if user_form.is_valid() and profile_form.is_valid():
-            # Save user's form data to database
-            user = user_form.save(commit=False)
-            user.set_password(password)
-            # Save user profile form date to database
-            user_profile = profile_form.save(commit=False)
-            user_profile.approved = False
-            user_profile.user = user
-            save_profile = True
-
-            if 'profile_pic' in request.FILES:
-                picture = request.FILES['profile_pic']
-                if '.jpg' in picture.name or '.png' in picture.name:
-                    # Uploading Photo to Cloudinary in "user_photo" folder with id of username
-                    response = cloudinary.uploader.upload(request.FILES['profile_pic'],
-                                                          folder="user_photo/",
-                                                          public_id=user.username)
-                    user_profile.profile_pic = response['secure_url']
-                else:
-                    save_profile = False
-                    image_error = "Invalid Image File Type!"
-            # In Case there is no uploaded image, use default ranog one
-            else:
-                user_profile.profile_pic = static('images/rango.jpg')
-
-            if save_profile:
-                # Generate verification code and send to the user's email address
-                user_profile.ver_code = generate_random_code()
-                send_mail_api(user_profile.user.username, user_profile.user.email, user_profile.ver_code)
-
-                # Hash password and save user object
-                # user.set_password(user.password)
-                user.save()
+            # Check if email address is not taken
+            try:
+                users = User.objects.get(email=email_address)
+            except MultipleObjectsReturned:
+                return render(request, 'eventually/register.html', {'user_form': user_form,
+                                                        'profile_form': profile_form,
+                                                        'registered': registered,
+                                                        'image_error': image_error,
+                                                        'email_error': 'Email address is already taken'})
+            except ObjectDoesNotExist:
+                # Save user's form data to database
+                user = user_form.save(commit=False)
+                user.set_password(password)
+                request.session['profile_id'] = user.id
+                # Save user profile form date to database
+                user_profile = profile_form.save(commit=False)
+                user_profile.approved = False
                 user_profile.user = user
-                user_profile.save()
+                save_profile = True
 
-                print('Account confirmation')
-                return HttpResponseRedirect(reverse('account_confirmation'))
+                if 'profile_pic' in request.FILES:
+                    picture = request.FILES['profile_pic']
+                    if '.jpg' in picture.name or '.png' in picture.name:
+                        # Uploading Photo to Cloudinary in "user_photo" folder with id of username
+                        response = cloudinary.uploader.upload(request.FILES['profile_pic'],
+                                                              folder="user_photo/",
+                                                              public_id=user.username)
+                        user_profile.profile_pic = response['secure_url']
+                    else:
+                        save_profile = False
+                        image_error = "Invalid Image File Type!"
+                # In Case there is no uploaded image, use default ranog one
+                else:
+                    user_profile.profile_pic = static('images/rango.jpg')
+
+                if save_profile:
+                    # Generate verification code and send to the user's email address
+                    user_profile.ver_code = generate_random_code()
+                    send_mail_api(user_profile.user.username, user_profile.user.email, user_profile.ver_code)
+
+                    # Hash password and save user object
+                    # user.set_password(user.password)
+                    user.save()
+                    user_profile.user = user
+                    user_profile.save()
+
+                    print('Account confirmation')
+                    return HttpResponseRedirect(reverse('account_confirmation'))
         else:
             # Print problems to the terminal in case of invalid forms
             print(user_form.errors, profile_form.errors)
@@ -215,7 +229,6 @@ def user_login(request):
         user = authenticate(username=username, password=password)
 
         profile = UserProfile.objects.get(user=user)
-
 
         # If we have a User object, the details are correct.
         # If None (Python's way of representing the absence of a value), no user
@@ -288,7 +301,6 @@ def account_confirmation(request):
             return HttpResponseRedirect(reverse('register'))
 
     return render(request, 'eventually/account_confirmation.html', {})
-
 
 
 def contact(request):
@@ -376,4 +388,4 @@ def password_reset(request):
 @login_required
 def sign_out(request):
     logout(request)
-    return HttpResponseRedirect(reverse('login'))
+    return HttpResponseRedirect(reverse('index'))

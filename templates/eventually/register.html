@@ -10,7 +10,11 @@ Register
 <div class="register-body container w3-animate-zoom">
     <div class="card white darken-1">
         <form id="user_form" method="POST" action="{% url 'register' %}" enctype="multipart/form-data">
+
             <div class="card-content">
+                {% if email_error  %}
+                        <strong style = "color:red;">A user with this email address already exists. Please use a different one</strong>
+                {% endif %}
                 <span class="card-title center">Register - Eventually</span>
                 {% csrf_token %}
                 <div class="row">
@@ -21,6 +25,7 @@ Register
                         <div class="btn">
                             <span>Avatar</span>
                         </div>
+
                         {{ profile_form.as_p }}
                         <div class="file-path-wrapper">
                             <input class="file-path validate" type="text">
