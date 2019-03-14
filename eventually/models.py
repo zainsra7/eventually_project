@@ -1,10 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
-# Create your models here.
-
+from django.utils.timezone import now
+from django.core.validators import MinValueValidator, MinLengthValidator
 
 class UserProfile(models.Model):
-    max_length = 200
     user = models.OneToOneField(User)
     profile_pic = models.URLField(blank=True)
     ver_code = models.CharField(max_length=6)
@@ -15,17 +14,18 @@ class UserProfile(models.Model):
 
 
 class Event(models.Model):
-    max_length = 200
-    title = models.CharField(max_length=max_length)
-    description = models.CharField(max_length=max_length * 5)
-    image = models.URLField()
-    location = models.CharField(max_length=8)  # PostalCode
-    address = models.CharField(max_length=max_length * 5)   # Actual Address
-    date = models.DateTimeField(auto_now=False)
-    capacity = models.IntegerField(default=0)
-    fb_link = models.URLField()
+    title = models.CharField(max_length=200)
+    description = models.CharField(max_length=5000)
+    image = models.URLField(blank=True)
+    post_code = models.CharField(max_length=8, validators=[MinLengthValidator(6, "UK PostCode is 6-8 Characters")])  # PostalCode
+    address = models.CharField(max_length=2000)   # Complete Address
+    date = models.DateField(default=now, blank=False)
+    time = models.TimeField(default=now, blank=True)
+    capacity = models.PositiveSmallIntegerField(default=1, validators=[MinValueValidator(1, "Number of Attendees must be a positive number!")])
+    fb_page = models.CharField(blank=True, max_length=200) #Event FB_Page Name
     host = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-
+    attendees = models.IntegerField(default=0, blank=True)
+    
     def __str__(self):
         return self.title
 
@@ -41,8 +41,7 @@ class Attendee(models.Model):
         return self.user.user.username + " -> " + self.event.title
 
 class Tag(models.Model):
-    max_length = 200
-    tag = models.CharField(max_length=max_length)
+    tag = models.CharField(max_length=200)
     event = models.ManyToManyField(Event)
 
     def __str__(self):

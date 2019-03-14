@@ -18,6 +18,9 @@ Index
 <!-- Host Event, Search Event, Popular Events (Using CSS Flexbox)-->
 <main>
     <div class="main-container">
+        {% if user.is_authenticated%}
+        <div class="heading w3-animate-left white-text"><h2>Hi <em>{{user.first_name}}!</em></h2></div>
+        {% endif %}
         <div class="heading w3-animate-zoom">
             <div class="w3-panel w3-topbar w3-bottombar w3-border-blue">
                 <!-- Source: csstricks.com -->
