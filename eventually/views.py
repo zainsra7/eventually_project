@@ -342,3 +342,60 @@ def account_confirmation(request):
 
 def contact(request):
     return HttpResponse("Contact us page showing Team behind Eventually")
+
+
+
+# Apologies for the ambiguity between forgot_password and password reset. Forgot_password is the first page
+# where users get to enter their email address. Whereas password reset is the next page where the user
+# actually enters the new passcode and verification code
+def forgot_password(request):
+    # Possibly better option is to use a form field.
+    if request.method == 'POST':
+        email = request.POST.get('email')
+
+        ver_code = generate_random_code()
+        send_mail_forgot_password(email, ver_code)
+        request.session["email"] = email
+        try:
+            user = User.objects.get(email=email)
+            profile = UserProfile.objects.get(user=user)
+            profile.ver_code = ver_code
+            profile.save()
+
+            return HttpResponseRedirect(reverse('password_reset'))
+        except User.DoesNotExist:
+            return render(request, 'eventually/forgot_password.html',
+                          {'error': 'Email address is incorrect'})
+        except UserProfile.DoesNotExist:
+            return render(request, 'eventually/forgot_password.html',
+                          {'error': 'Email address is incorrect'})
+
+    return render(request, 'eventually/forgot_password.html', {})
+
+
+def password_reset(request):
+    if request.method == 'POST':
+        email = request.session["email"]
+        password = request.POST.get('password')
+        ver_code = request.POST.get('ver_code')
+
+        try:
+            user = User.objects.get(email=email)
+            profile = UserProfile.objects.get(user=user)
+
+            if profile:
+                if profile.ver_code == ver_code:
+                    user.set_password(password)
+                    user.save()
+                    return render(request, 'eventually/index.html', {'user': user})
+                else:
+                    return render(request, 'eventually/forgot_password_confirmation.html',
+                                  {'error': 'Verification code is incorrect'})
+            else:
+                return render(request, 'eventually/forgot_password_confirmation.html',
+                              {'error': 'Email address is incorrect'})
+        except User.DoesNotExist:
+            return render(request, 'eventually/forgot_password_confirmation.html',
+                          {'error': 'Email address is incorrect'})
+
+    return render(request, 'eventually/forgot_password_confirmation.html', {})
