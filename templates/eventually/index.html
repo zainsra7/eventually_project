@@ -15,16 +15,26 @@ Index
 
     {% block body_block %}
 
-    <!-- Host Event, Search Event, Popular Events (Using CSS Flexbox)-->
-    <main>
-        <div class="main-container">
-            <div class="heading w3-animate-zoom">
-                <div class="w3-panel w3-topbar w3-bottombar w3-border-blue">
-                    <!-- Source: csstricks.com -->
-                    <p class="w3-typewriter typewrite white-text w3-xxlarge flow-text" data-period="80"
-                        data-type='[ "Be a Host.", "Join an Event.", "@UoG", "Engage, Have Fun !" ]'>
-                        <span class="wrap"></span>
-                    </p>
+<!-- Host Event, Search Event, Popular Events (Using CSS Flexbox)-->
+<main>
+    <div class="main-container">
+        {% if user.is_authenticated%}
+        <div class="heading w3-animate-left white-text"><h2>Hi <em>{{user.first_name}}!</em></h2></div>
+        {% endif %}
+        <div class="heading w3-animate-zoom">
+            <div class="w3-panel w3-topbar w3-bottombar w3-border-blue">
+                <!-- Source: csstricks.com -->
+                <p class="w3-typewriter typewrite white-text w3-xxlarge flow-text" data-period="80" data-type='[ "Be a Host.", "Join an Event.", "@UoG", "Engage, Have Fun !" ]'>
+                    <span class="wrap"></span>
+                </p>
+            </div>
+        </div>
+        <div class="host-search-bar black">
+            <a id="host-btn" href="{% url 'host' %}" class="waves-effect waves-green waves-light btn"><i class="material-icons left">add_circle</i>Host</a>
+            <form id="search-form">
+                <div class="input-field inline">
+                    <input id="search-field" type="text" class="validate white-text">
+                    <label for="search-field">Search</label>
                 </div>
             </div>
             <div class="host-search-bar black">

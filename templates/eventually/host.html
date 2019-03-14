@@ -6,32 +6,34 @@ Host an Event
 {% endblock %}
 
 {% block css_block %}
+  <!-- XDSoft DateTimePicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
 {% endblock %}
 
 {% block body_block %}
 
 <div class=" container w3-animate-zoom">
     <div class="card white darken-1">
-        <form id="event-Form" method="POST" action="{% url 'host' %}" enctype="multipart/form-data">
+        <form id="event-form" method="POST" action="{% url 'host' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="card-content">
                 <span class="card-title center">Host an Event!</span>
-                <input id="date" type="text" name="date" class="datepicker" />
-                <label for="date">Date</label>
-                <input id="time" name="time" type="text" class="timepicker" />
-                <label for="time">Time</label>
-                    {{ event_form.as_p }}
-                <div class="row">
-                    <div class="file-field input-field">
-                        <div class="btn">
-                            <span>Picture</span>
-                            <input type="file" accept="image/*">
-                        </div>
-                        <div class="file-path-wrapper">
-                            <input class="file-path validate" type="text">
+                    <div class="row">{{ event_form.as_p }}</div>
+                    <div class="row">
+                        <div class="file-field input-field">
+                            <div class="btn">
+                                <span>Image</span>
+                            </div>
+                            {{ event_image_form.as_p }}
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text">
+                            </div>
+                            <p class="errorlist">
+                            {{ image_error }}
+                            </p>
                         </div>
                     </div>
-                </div>
             </div>
             <div class="card-action blue">
                 <div class="input-field center">

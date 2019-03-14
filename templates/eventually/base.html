@@ -40,7 +40,7 @@
                         {% if user.is_authenticated %}
                         <li><a href="{% url 'dashboard' %}" class="waves-effect waves-green green btn-floating blue white-text waves-circle tooltipped" data-position="bottom" data-tooltip="Dashboard"><i
                                     class="material-icons">dashboard</i></a></li>
-                        <li><a href="{% url 'profile' %}" class="waves-effect waves-green grey btn-floating blue white-text waves-circle tooltipped" data-position="bottom" data-tooltip="Profile"><i
+                        <li><a href="{% url 'user_profile' %}" class="waves-effect waves-green grey btn-floating blue white-text waves-circle tooltipped" data-position="bottom" data-tooltip="Profile"><i
                                     class="material-icons">person</i></a></li>
                         <li><a href="{% url 'logout' %}" class="waves-effect waves-green  btn-floating red white-text waves-circle tooltipped" data-position="left" data-tooltip="Logout"><i
                                     class="material-icons">exit_to_app</i></a></li>
@@ -58,8 +58,8 @@
                     <div class="background">
                     </div>
                     {% if user.is_authenticated %}
-                    <img class="circle responsive-img" src="{% static 'images/pickachu.png' %}">
-                    <span class="black-text name"><em>{{user.username}}</em></span>
+                    <img class="circle responsive-img" src={{profile_pic}}>
+                    <span class="black-text name"><em>{{user.first_name}}</em>  <em>{{user.last_name}}</em></span>
                     <span class="black-text email"><em>{{user.email}}</em></span>
                     {% else %}
                     <img class="circle responsive-img" src="{% static 'images/pickachu.png' %}">
@@ -78,7 +78,7 @@
             <li>
                 <div class="divider"></div>
             </li>
-            <li><a href="{% url 'profile' %}" class="waves-effect waves-green grey "><i class="material-icons">person</i>
+            <li><a href="{% url 'user_profile' %}" class="waves-effect waves-green grey "><i class="material-icons">person</i>
                     Profile</a></li>
             <li>
                 <div class="divider"></div>
