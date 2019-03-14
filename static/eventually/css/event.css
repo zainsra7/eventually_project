@@ -1,4 +1,4 @@
-/* Event details */
+/* Event details and facebook plugin */
 
 p {
   padding: 10px;
@@ -21,6 +21,7 @@ p {
 
 #details-facebook {
   display: flex;
+  justify-content: center
 }
 
 #event-details {
@@ -48,6 +49,10 @@ p {
 
 #does-not-exist {
   text-align: center;
+}
+
+#contact-host-btn, #edit-event-btn {
+  margin: 10px;
 }
 
 /* Date CSS by Pali Madra @CodePen*/
@@ -88,9 +93,9 @@ p {
 
 
 
-/* Contact host */
+/* Options (Contact host and edit event buttons) */
 
-.contact-host-bar{
+.options-bar{
   display: flex;
   justify-content: center;
   margin-top: -10px;
@@ -117,5 +122,6 @@ p {
 @media screen and (max-width: 700px) {
   #details-facebook, #comment-map{   
     flex-direction: column;
+    align-items: center;
   }
 }

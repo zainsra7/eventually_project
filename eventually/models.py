@@ -23,8 +23,9 @@ class Event(models.Model):
     address = models.CharField(max_length=max_length * 5)   # Actual Address
     date = models.DateTimeField(auto_now=False)
     capacity = models.IntegerField(default=0)
-    fb_link = models.URLField()
+    fb_link = models.CharField(max_length=max_length, blank=True)
     host = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    attendees = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title

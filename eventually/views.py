@@ -4,12 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from eventually.forms import UserForm, UserProfileForm, ProfileForm, EventForm
 from django.contrib.staticfiles.templatetags.staticfiles import static
-from eventually.models import UserProfile
-from eventually.models import Event, Attendee
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from eventually.models import UserProfile, Event, Attendee, Tag
 from django.urls import reverse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Q
+from datetime import datetime
 
 
 cloudinary.config(
@@ -18,32 +19,57 @@ cloudinary.config(
     api_secret='B9r_lNfKaNy2Z8bK3d9wDksxhOs'
 )
 
-##### need to sort by attendees
 def index(request):
-    # Fetch Popular Events from Database
-    
-    events = Event.objects.order_by('-date')[:5]
+    # Fetch all events from database
+    events = Event.objects.all()
+
+    # Get only five most popular events
+    events = events.order_by('-attendees')[:5]
+
     context_dict = {'events': events}
     response = render(request, 'eventually/index.html', context=context_dict)
     return response
 
 def dashboard(request):
-    #Fetch Popular Events from Database
-    events = range(9)
-    context_dict = {'events': events, }
-    response = render(request, 'eventually/dashboard.html', context=context_dict)
-    return response
-    
-def search(request):
-    if request.method == 'POST':
-        search = request.POST['search']
+    # GET requests
+    search = request.GET.get('search', "")
+    type_value = request.GET.get('type', "joined")
+    filter_value = request.GET.get('filter', "upcoming")
+    sort_value = request.GET.get('sort', "date")
+
+    # Get current user
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    # Fetch all events from database
+    event_list_event = Event.objects.filter(Q(title__contains = search) | Q(location__contains = search) | Q(address__contains = search))
+    event_tag_id = Tag.objects.filter(tag__contains = search).values_list('event', flat=True)
+    event_list_tag = Event.objects.filter(id__in=event_tag_id)
+    event_list = event_list_event | event_list_tag
+
+    # Get relevant events based on selected filter
+    if (filter_value == "upcoming"):
+        event_filtered = event_list.filter(date__gte = datetime.now())
+    elif (filter_value == "past"):
+        event_filtered = event_list.filter(date__lte = datetime.now())
     else:
-        search = ''
+        event_filtered = event_list
 
-    event_list = Event.objects.filter(title__contains = search)
+    # Get relevant events based on selected sort
+    if (sort_value == "date"): 
+        event_sorted = event_filtered.order_by('-date')
+    else:
+        event_sorted = event_filtered.order_by('-attendees')
 
+    # Get relevant events based on selected type
+    if (type_value == "joined"):
+        joined = Attendee.objects.filter(user=user_profile).values_list('event', flat=True)
+        event_selected = event_sorted.filter(id__in=joined)
+    else:
+        event_selected = event_sorted.filter(host=user_profile)
+
+    # Pagination
     page = request.GET.get('page', 1)
-    paginator = Paginator(event_list, 5)
+    paginator = Paginator(event_selected, 9)
 
     try:
         events = paginator.page(page)
@@ -53,9 +79,50 @@ def search(request):
         events = paginator.page(paginator.num_pages)
     except Event.DoesNotExist:
         events = None
-
     
-    response = render(request, 'eventually/search.html', context={'events': events})
+    response = render(request, 'eventually/dashboard.html', context={'events': events, 'search': search, 'type_value': type_value, 'filter_value': filter_value, 'sort_value': sort_value})
+    return response
+    
+def search(request):
+    # GET requests
+    search = request.GET.get('search', "")
+    filter_value = request.GET.get('filter', "upcoming")
+    sort_value = request.GET.get('sort', "date")
+
+    # Fetch all events from database
+    event_list_event = Event.objects.filter(Q(title__contains = search) | Q(location__contains = search) | Q(address__contains = search))
+    event_tag_id = Tag.objects.filter(tag__contains = search).values_list('event', flat=True)
+    event_list_tag = Event.objects.filter(id__in=event_tag_id)
+    event_list = event_list_event | event_list_tag
+
+    # Get relevant events based on selected filter
+    if (filter_value == "upcoming"):
+        event_filtered = event_list.filter(date__gte = datetime.now())
+    elif (filter_value == "past"):
+        event_filtered = event_list.filter(date__lte = datetime.now())
+    else:
+        event_filtered = event_list
+
+    # Get relevant events based on selected sort
+    if (sort_value == "date"): 
+        event_sorted = event_filtered.order_by('-date')
+    else:
+        event_sorted = event_filtered.order_by('-attendees')
+
+    # Pagination
+    page = request.GET.get('page', 1)
+    paginator = Paginator(event_sorted, 5)
+
+    try:
+        events = paginator.page(page)
+    except PageNotAnInteger:
+        events = paginator.page(1)
+    except EmptyPage:
+        events = paginator.page(paginator.num_pages)
+    except Event.DoesNotExist:
+        events = None
+    
+    response = render(request, 'eventually/search.html', context={'events': events, 'search': search, 'filter_value': filter_value, 'sort_value': sort_value})
     return response
 
 def host(request):
@@ -82,21 +149,26 @@ def host(request):
 def event(request, event_id):
     context_dict = {}
     try:
+        # Get event and tags based on ID
         event = Event.objects.get(id=event_id)
-        attendees = Attendee.objects.filter(event=event).count()
+        tags = Tag.objects.filter(event=event)
         try:
+            # Check if user has already joined event
             user_profile = UserProfile.objects.get(user=request.user)
             joined = Attendee.objects.filter(event=event).filter(user=user_profile)
         except:
             joined = None
 
         context_dict['event'] = event
-        context_dict['attendees'] = attendees
         context_dict['joined'] = joined
+        context_dict['tags'] = tags
     except:
         context_dict['event'] = None
-        context_dict['attendees'] = None
         context_dict['joined'] = None
+        context_dict['tags'] = None
+
+    closed = (datetime.now().date() > event.date.date() and datetime.now().time() > event.date.time())
+    context_dict['closed'] = closed
 
     return render(request, 'eventually/event.html', context_dict)
 
@@ -104,23 +176,30 @@ def event(request, event_id):
 def join_event(request):
     event_id = None
 
+    # Get event ID
     if request.method == 'GET':
         event_id = request.GET['event_id']
-    
-    attendees = 0
 
     if event_id:
+        # Get event based on ID
         event = Event.objects.get(id=int(event_id))
     
         if event:
             user_profile = UserProfile.objects.get(user=request.user)
 
             if user_profile:
-                attendee = Attendee(event=event, user=user_profile)
-                attendee.save()
-                attendees = Attendee.objects.filter(event=event).count()
+                # Add/Delete user as attendee of event in Attendee model
+                try:
+                    attendee = Attendee(event=event, user=user_profile)
+                    attendee.save()
+                except:
+                    Attendee.objects.filter(Q(event=event) & Q(user=user_profile)).delete()
+
+                # Update number of attendees in Event model
+                event.attendees = Attendee.objects.filter(event=event).count()
+                event.save()
     
-    return HttpResponse(attendees)
+    return HttpResponse(event.attendees)
 
 @login_required
 def profile(request):

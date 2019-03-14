@@ -1,5 +1,6 @@
 {% extends 'eventually/base.html' %}
 {% load staticfiles %}
+{% load eventually_template_tags %}
 
 {% block css_block %}
 <link href="{% static 'eventually/css/search.css' %}" type="text/css" rel="stylesheet" />
@@ -14,42 +15,41 @@ Search
 <!-- Search bar -->
 <nav class="container white" id="search-container">
 
-    <div class="nav-wrapper w3-animate-left" style="flex: 2">
-        <form id="search-form" method="POST" action="{% url 'search' %}">
-            {% csrf_token %}
+    <div class="nav-wrapper">
+        <form id="search-form" method="GET" action="{% url 'search' %}" enctype="multipart/form-data">
             <div class="input-field">
-                <input id="search" name="search" type="search" placeholder="Search for event name, tags, location" required>
+                <input id="search" name="search" type="search" placeholder="Search for event name, tags, location"
+                    value="{{ search }}">
                 <label class="label-icon" for="search"><i class="material-icons grey-text">search</i></label>
                 <i class="material-icons grey-text" id="empty-search">close</i>
             </div>
-            
-        
-   </div>    
+    </div>
 
-    <!-- Filter dropdown trigger -->
-    <a class='dropdown-button btn w3-animate-right' href='#' data-target='filter'>Filter</a>
+    <!-- Filter selection -->
+    <div class="input-field" id="filter-field">
+        <select id="filter-select">
+            <option value="upcoming">Upcoming</option>
+            <option value="past">Past</option>
+            <option value="all">All</option>
+        </select>
+        <label>Filter</label>
+        <input type="hidden" name="filter" id="filter" method="GET" action="{% url 'search' %}" />
+    </div>
 
-    <!-- Filter dropdown structure -->
-    <ul id='filter' class='dropdown-content'>
-        <li><a href="#!">Upcoming</a></li>
-        <li><a href="#!">Past</a></li>
-        <li><a href="#!">All</a></li>
-    </ul>
-
-    <!-- Sort dropdown trigger -->
-    <a class='dropdown-button btn w3-animate-right' href='#' data-target='sort'>Sort</a>
-
-    <!-- Sort dropdown structure -->
-    <ul id='sort' class='dropdown-content'>
-        <li><a href="#!">Date</a></li>
-        <li><a href="#!">Popularity</a></li>
-    </ul>
+    <!-- Sort selection -->
+    <div class="input-field" id="sort-field">
+        <select id="sort-select">
+            <option value="date">Date</option>
+            <option value="popularity">Popularity</option>
+        </select>
+        <label>Sort</label>
+        <input type="hidden" name="sort" id="sort" method="GET" action="{% url 'search' %}" />
+    </div>
 
     <!-- Search button -->
-   <button id="search-button" class='btn w3-animate-right' type='submit'>Search</button>
-</form>
+    <button id="search-button" class='btn' type='submit'>Search</button>
+    </form>
 </nav>
-
 
 <!-- Events -->
 <div class="container" id="events-container">
@@ -68,15 +68,11 @@ Search
                 </div>
                 <div class="card-stacked">
                     <div class="card-content">
-<<<<<<< HEAD
                         <div class="card-title">{{ event.title }}</div>
-                        <p><i class="material-icons">location_on</i> <b>Location: {{ event.address }}</b></p>
-                        <p><i class="material-icons">group</i> <b>Attendees: /{{ event.capacity }}</b></p>
-=======
-                        <div class="card-title">Event namemkmkamsmdkasldmklamsdaklmsdaksdml</div>
-                        <p><i class="material-icons">location_on</i> <b>Location: </b></p>
-                        <p><i class="material-icons">group</i> <b>Attendees: </b></p>
->>>>>>> e96f4d69287868d368f34a252e8b6b887338e0cd
+                        <p><i class="material-icons">location_on</i> <b>Location: </b> {{ event.address }},
+                            {{ event.location }}</p>
+                        <p><i class="material-icons">group</i> <b>Attendees: </b> {{ event.attendees }} /
+                            {{ event.capacity }}</p>
                     </div>
                 </div>
             </div>
@@ -90,10 +86,11 @@ Search
 
 <!-- Pagination -->
 {% if events.has_other_pages %}
-<div class="container w3-animate-zoom" id="pagination-container">
+<div class="container" id="pagination-container">
     <ul class="pagination">
         {% if events.has_previous %}
-        <li class="waves-effect"><a href="?page={{ events.previous_page_number }}"><i class="material-icons">chevron_left</i></a></li>
+        <li class="waves-effect"><a href="?{% url_replace page=events.previous_page_number %}"><i
+                    class="material-icons">chevron_left</i></a></li>
         {% else %}
         <li class="disabled"><a><i class="material-icons">chevron_left</i></a></li>
         {% endif %}
@@ -101,11 +98,12 @@ Search
         {% if events.number == i %}
         <li class="active blue-grey"><a>{{ i }} <span class="sr-only">(current)</span></a></li>
         {% else %}
-        <li class="waves-effect"><a href="?page={{ i }}">{{ i }}</a></li>
+        <li class="waves-effect"><a href="?{% url_replace page=i %}">{{ i }}</a></li>
         {% endif %}
         {% endfor %}
         {% if events.has_next %}
-        <li class="waves-effect"><a href="?page={{ events.next_page_number }}"><i class="material-icons">chevron_right</i></a></li>
+        <li class="waves-effect"><a href="?{% url_replace page=events.next_page_number %}"><i
+                    class="material-icons">chevron_right</i></a></li>
         {% else %}
         <li class="disabled"><a><i class="material-icons">chevron_right</i></a></li>
     </ul>
@@ -113,4 +111,7 @@ Search
 </div>
 {% endif %}
 
+<!-- Parameters for persistence of filter and sort -->
+<input type=hidden id="filter-param" value="{{ filter_value }}" />
+<input type=hidden id="sort-param" value="{{ sort_value }}" />
 {% endblock %}

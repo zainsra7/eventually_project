@@ -10,60 +10,65 @@ Index
 {% endblock %}
 
 {% block jumbotron%}
-<div class = "jumbotron-wrapper" style="background-image: url({% static 'images/background.jpg' %});">
-{% endblock %}
+<div class="jumbotron-wrapper" style="background-image: url({% static 'images/background.jpg' %});">
+    {% endblock %}
 
-{% block body_block %}
+    {% block body_block %}
 
-<!-- Host Event, Search Event, Popular Events (Using CSS Flexbox)-->
-<main>
-    <div class="main-container">
-        <div class="heading w3-animate-zoom">
-            <div class="w3-panel w3-topbar w3-bottombar w3-border-blue">
-                <!-- Source: csstricks.com -->
-                <p class="w3-typewriter typewrite white-text w3-xxlarge flow-text" data-period="80" data-type='[ "Be a Host.", "Join an Event.", "@UoG", "Engage, Have Fun !" ]'>
-                    <span class="wrap"></span>
-                </p>
-            </div>
-        </div>
-        <div class="host-search-bar black">
-            <a id="host-btn" href="{% url 'host' %}" class="waves-effect waves-green waves-light btn"><i class="material-icons left">add_circle</i>Host</a>
-            <form id="search-form">
-                <div class="input-field inline">
-                    <input id="search-field" type="text" class="validate white-text">
-                    <label for="search-field">Search</label>
+    <!-- Host Event, Search Event, Popular Events (Using CSS Flexbox)-->
+    <main>
+        <div class="main-container">
+            <div class="heading w3-animate-zoom">
+                <div class="w3-panel w3-topbar w3-bottombar w3-border-blue">
+                    <!-- Source: csstricks.com -->
+                    <p class="w3-typewriter typewrite white-text w3-xxlarge flow-text" data-period="80"
+                        data-type='[ "Be a Host.", "Join an Event.", "@UoG", "Engage, Have Fun !" ]'>
+                        <span class="wrap"></span>
+                    </p>
                 </div>
-                <a href="{% url 'search' %}" type="submit" class="waves-effect waves-green btn-floating green white-text waves-circle"><i
-                        class="material-icons">search</i></a>
-            </form>
-        </div>
-        <a id="pin-btn" class="btn-floating pulse btn blue"><i class="material-icons large">pin_drop</i></a>
-    </div>
-</div> <!-- End of Jumbotron wrapper -->
-    <div id="popular-events" >
-        <h2 id="popular-events-title">Popular Events</h2>
-        {% if events %}
-        {% for event in events %}
-        <a href="{% url 'event' event.id %}">
-            <div class="flip">
-                <div class="front" style="background-image: url({{ event.image }})">
-                    <div class="example-date">
-                        <span class="day">{{ event.date|date:"d" }}</span>
-                        <span class="month">{{ event.date|date:"M" }}</span>
-                        <span class="year">{{ event.date|date:"Y" }}</span>
+            </div>
+            <div class="host-search-bar black">
+                <a id="host-btn" href="{% url 'host' %}" class="waves-effect waves-green waves-light btn"><i
+                        class="material-icons left">add_circle</i>Host</a>
+                <form id="search-form">
+                    <div class="input-field inline">
+                        <input id="search-field" type="text" class="validate white-text">
+                        <label for="search-field">Search</label>
                     </div>
-                </div>
-                <div class="back">
-                    <h4 class="event-title">{{ event.title }}</h4>
-                    <div class="divider"></div>
-                    <p class="event-location">{{ event.address }}</p>
+                    <a href="{% url 'search' %}" type="submit"
+                        class="waves-effect waves-green btn-floating green white-text waves-circle"><i
+                            class="material-icons">search</i></a>
+                </form>
+            </div>
+            <a id="pin-btn" class="btn-floating pulse btn blue"><i class="material-icons large">pin_drop</i></a>
+        </div>
+</div> <!-- End of Jumbotron wrapper -->
+
+<!-- Five most popular events -->
+<div id="popular-events">
+    <h2 id="popular-events-title">Popular Events</h2>
+    {% if events %}
+    {% for event in events %}
+    <a href="{% url 'event' event.id %}">
+        <div class="flip w3-animate-zoom">
+            <div class="front" style="background-image: url({{ event.image }})">
+                <div class="date">
+                    <span class="day">{{ event.date|date:"d" }}</span>
+                    <span class="month">{{ event.date|date:"M" }}</span>
+                    <span class="year">{{ event.date|date:"Y" }}</span>
                 </div>
             </div>
-        </a>
-        {% endfor %}
-        {% else %}
-        No events
-        {% endif %}
-    </div>
+            <div class="back">
+                <h4 class="event-title">{{ event.title }}</h4>
+                <div class="divider"></div>
+                <p class="event-location">{{ event.address }}, {{ event.location }}</p>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    {% else %}
+    <p>No events</p>
+    {% endif %}
+</div>
 </main>
 {% endblock %}
