@@ -229,7 +229,11 @@ def user_login(request):
         # combination is valid - a User object is returned if it is
         user = authenticate(username=username, password=password)
 
-        profile = UserProfile.objects.get(user=user)
+        try:
+            profile = UserProfile.objects.get(user=user)
+        except ObjectDoesNotExist:
+            return render(request, 'eventually/index.html', {'error':'No user matches the details inputted'})
+
 
         # If we have a User object, the details are correct.
         # If None (Python's way of representing the absence of a value), no user
@@ -324,25 +328,6 @@ def send_mail_api(username, email, ver_code):
     message = EmailMultiAlternatives(subject, text_content, from_email, [to])
     message.attach_alternative(html_content, "text/html")
     message.send()
-
-
-def send_mail_api(username, email, ver_code):
-    print(username, email, ver_code)
-
-    image = qrcode.make("This is Samuel's QR")
-    imageByteArray = io.BytesIO()
-    image.save(imageByteArray, format='PNG')
-    image_modified = imageByteArray.getvalue()
-
-    subject, from_email, to = 'Verification Code', 'events@eventually.com', email
-    text_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
-    html_content = '<strong>Let us see if this works</strong>'
-    message = EmailMultiAlternatives(subject, text_content, from_email, [to])
-    message.attach_alternative(html_content, "text/html")
-
-    message.attach('sam.png', image_modified, 'image/png')
-    message.send()
-
 
 def send_events_qr_code(username, email, event_name, event_date, event_venue):
     image = qrcode.make("Name : Sam. Event : Event 2")
