@@ -1,9 +1,8 @@
 import cloudinary
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from eventually.forms import UserForm, UserProfileForm, ProfileForm
+from eventually.forms import UserForm, UserProfileForm, ProfileForm, EventForm
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from eventually.models import UserProfile
 from django.contrib.auth.models import User
@@ -49,15 +48,29 @@ def search(request):
     response = render(request, 'eventually/search.html', context=context_dict)
     return response
 
-
-@login_required
 def host(request):
-    return HttpResponse("Host Event Page to create an event")
+    # Successful create_event check
+    event_created = False
+
+    # To display error if the uploaded picture is not valid
+    image_error = ""
+
+    if request.method == "POST":
+        event_form = EventForm(data=request.POST)
+
+        if event_form.is_valid():
+            event = event_form.save(commit=False)
+        else:
+            print(event_form.errors)
+    else:
+        # Return a blank form
+        event_form = EventForm()
+        print(event_form)
+    return render(request,'eventually/host.html',{"event_form": event_form})
 
 
 def event(request):
     return render(request, 'eventually/event.html', {})
-
 
 @login_required
 def profile(request):
@@ -88,8 +101,8 @@ def profile(request):
                 if '.jpg' in picture.name or '.png' in picture.name:
                     # Uploading Photo to Cloudinary in "user_photo" folder with id of username
                     response = cloudinary.uploader.upload(request.FILES['profile_pic'],
-                                                          folder="user_photo/",
-                                                          public_id=user.username)
+                                                    folder="user_photo/",
+                                                    public_id=user.username)
                     user_profile.profile_pic = response['secure_url']
                 else:
                     profile_update = False
@@ -101,8 +114,8 @@ def profile(request):
                 user.save(update_fields=['password'])
                 # Save user profile form date to database
                 user_profile.user = user
-                user_profile.save(update_fields=['user', 'profile_pic'])
-                profile_update = True  # Indicate that profile  was updated successfully
+                user_profile.save(update_fields=['user', 'profile_pic']) # Only update "user" and "profile_pic" field of UserProfile instance
+                profile_update = True # Indicate that profile  was updated successfully
         else:
             # Print problems to the terminal in case of invalid forms
             print(user_form.errors, profile_form.errors)
@@ -113,9 +126,9 @@ def profile(request):
 
     # Render template depending on the context.
     return render(request, 'eventually/profile.html', {'user_form': user_form,
-                                                       'profile_form': profile_form,
-                                                       'profile_update': profile_update,
-                                                       'image_error': image_error})
+                                                        'profile_form': profile_form,
+                                                        'profile_update': profile_update,
+                                                        'image_error': image_error})
 
 
 # Sign Up flow 1. Show user form for registration 2. Validate form upon submission and return errors if any 3. If
@@ -201,7 +214,6 @@ def register(request):
                                                         'profile_form': profile_form,
                                                         'registered': registered,
                                                         'image_error': image_error})
-
 
 @login_required
 def user_logout(request):

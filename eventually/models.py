@@ -1,8 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User, AbstractUser
-
-
+from django.contrib.auth.models import User
 # Create your models here.
+
 
 class UserProfile(models.Model):
     max_length = 200
@@ -20,10 +19,11 @@ class Event(models.Model):
     title = models.CharField(max_length=max_length)
     description = models.CharField(max_length=max_length * 5)
     image = models.URLField()
-    location = models.CharField(max_length=max_length * 3)  # GPS Coordinates
-    address = models.CharField(max_length=max_length * 5)  # Actual Address
-    date = models.DateField(auto_now=False)
+    location = models.CharField(max_length=8)  # PostalCode
+    address = models.CharField(max_length=max_length * 5)   # Actual Address
+    date = models.DateTimeField(auto_now=False)
     capacity = models.IntegerField(default=0)
+    fb_link = models.URLField()
     host = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -48,3 +48,4 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.tag
+

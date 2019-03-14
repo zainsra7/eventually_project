@@ -2,17 +2,11 @@ $(document).ready(function(){
     $(".sidenav").sidenav();
     $('.tooltipped').tooltip();
 
-    $("#login-btn").click(function(){
-      $("#login-btn").hide();
-      $("#login-form").show("slow");
+    $(".login-btn").click(function(){
+      document.getElementById('login-modal').style.display='block';
+      $(".sidenav").sidenav();
     });
-
-    $("#cancel-login-btn").click(function(){
-      $("#login-form").hide("slow");
-      $("#login-btn").show();
-    });
-
-    $("#login_send").click(function(){
-      $("#login-form").submit();
+    $(".cancel-btn").click(function(){
+      document.getElementById('login-modal').style.display='none';
     });
 });
