@@ -13,27 +13,34 @@ Profile
 
 <div class="profile-body container w3-animate-zoom">
     <div class="card white darken-1">
-        <form action="{% url 'profile' %}" enctype="multipart/form-data" id="user_form" method="POST">
+        <form action="{% url 'user_profile' %}" enctype="multipart/form-data" id="user_form" method="POST">
             <div class="card-content">
                 <div class="ribbon">
                     <a href="">Profile</a>
                 </div>
                 <div class="center container">
-                    <div id="profile-card"class="card-panel grey lighten-5 z-depth-3 w3-topbar w3-bottombar w3-border-blue">
+                    {% if profile_update %}
+                    <div class="w3-panel green w3-display-container">
+                        <span onclick="this.parentElement.style.display='none'" class="w3-button w3-display-topright">X</span>
+                        <p>Profile Updated Successfully!</p>
+                        <p></p>
+                    </div>
+                    {% endif %}
+                    <h2>Hi <em>{{user.first_name}}!</em></h2>
+                    <div id="profile-card" class="card-panel grey lighten-5 z-depth-3 w3-topbar w3-bottombar w3-border-blue">
                         <div class="row valign-wrapper w3-mobile">
                             <div class="col s4 w3-border-aqua">
-                                <img alt="User Profile Picture" class="circle responsive-img" src="{% static 'images/rango.jpg' %}"
-                                    width="300px" />
+                                <img alt="User Profile Picture" class="circle responsive-img" src={{profile_pic}} width="300px" />
                             </div>
                             <div class="col s8 w3-mobile">
-                                    <i class="fas fa-user"></i>
+                                <i class="fas fa-user"></i>
                                 <div>
-                                        <em>{{user.username}}</em>
+                                    <em>{{user.username}}</em>
                                 </div>
-                                <div class= "divider"></div>
+                                <div class="divider"></div>
                                 <i class="fas fa-envelope"></i>
                                 <div>
-                                       <em>{{user.email}}</em>
+                                    <em>{{user.email}}</em>
                                 </div>
                             </div>
                         </div>

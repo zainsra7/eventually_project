@@ -2,7 +2,7 @@ import cloudinary
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from eventually.forms import UserForm, UserProfileForm, ProfileForm, EventForm
+from eventually.forms import UserForm, UserProfileForm, ProfileForm, EventForm, EventImageForm
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from eventually.models import UserProfile
 from django.contrib.auth.models import User
@@ -28,7 +28,10 @@ cloudinary.config(
 def index(request):
     # Fetch Popular Events from Database
     events = range(5)
-    context_dict = {'events': events, }
+    profile_pic = "/static/images/pickachu.png"
+    if request.user.is_authenticated():
+        profile_pic = UserProfile.objects.get(user=request.user).profile_pic
+    context_dict = {'events': events, "profile_pic" : profile_pic}
     response = render(request, 'eventually/index.html', context=context_dict)
     return response
 
@@ -48,6 +51,8 @@ def search(request):
     response = render(request, 'eventually/search.html', context=context_dict)
     return response
 
+
+@login_required
 def host(request):
     # Successful create_event check
     event_created = False
@@ -57,28 +62,46 @@ def host(request):
 
     if request.method == "POST":
         event_form = EventForm(data=request.POST)
+        event_image_form = EventImageForm(data=request.POST)
 
-        if event_form.is_valid():
-            event = event_form.save(commit=False)
+        if event_form.is_valid() and event_image_form.is_valid():
+            event = event_form.save(commit=False) # Get Event Object
+
+            event_created = True
+
+            if 'image' in request.FILES:
+                image = request.FILES['image']
+                if '.jpg' in image.name or '.png' in image.name:
+                    response = cloudinary.uploader.upload(request.FILES['image'],
+                                                        folder="event_photo/",
+                                                        public_id=event.id)
+                    event.image = response['secure_url']
+                else:
+                    event_created = False
+                    image_error = "Invalid Image File Type! Only .jpg and .png files supported!"
+            if event_created:
+                event.host = UserProfile.objects.get(user=request.user)
+                event.save()
         else:
-            print(event_form.errors)
+            print(event_form.errors, event_image_form.errors)
     else:
         # Return a blank form
         event_form = EventForm()
-        print(event_form)
-    return render(request,'eventually/host.html',{"event_form": event_form})
+        event_image_form = EventImageForm()
+    return render(request,'eventually/host.html',{"event_form": event_form, "event_image_form" : event_image_form, "image_error": image_error, "event_created": event_created})
 
 
 def event(request):
     return render(request, 'eventually/event.html', {})
 
 @login_required
-def profile(request):
+def user_profile(request):
     # Successful profile_update check
     profile_update = False
 
     # To display error if the uploaded picture is not valid
     image_error = ""
+    profile_pic = UserProfile.objects.get(user=request.user).profile_pic
 
     if request.method == 'POST':
 
@@ -88,34 +111,36 @@ def profile(request):
         # Check if forms are valid
         if user_form.is_valid() and profile_form.is_valid():
             # Get the current logged in User
-            user = User.objects.get(username=request.user.username)
-            user_profile = UserProfile.objects.get(user=user)
+            try:
+                user = User.objects.get(username=request.user.username)
+                profile = UserProfile.objects.get(user=user)
 
-            # Save user's form data to database
-            user_form_details = user_form.save(commit=False)
+                # Save user's form data to database
+                user_form_details = user_form.save(commit=False)
 
-            profile_update = True
+                profile_update = True
 
-            if 'profile_pic' in request.FILES:
-                picture = request.FILES['profile_pic']
-                if '.jpg' in picture.name or '.png' in picture.name:
-                    # Uploading Photo to Cloudinary in "user_photo" folder with id of username
-                    response = cloudinary.uploader.upload(request.FILES['profile_pic'],
-                                                    folder="user_photo/",
-                                                    public_id=user.username)
-                    user_profile.profile_pic = response['secure_url']
-                else:
-                    profile_update = False
-                    image_error = "Invalid Image File Type!"
-
-            if profile_update:
-                # Hash password and save user object
-                user.set_password(user_form_details.password)
-                user.save(update_fields=['password'])
-                # Save user profile form date to database
-                user_profile.user = user
-                user_profile.save(update_fields=['user', 'profile_pic']) # Only update "user" and "profile_pic" field of UserProfile instance
-                profile_update = True # Indicate that profile  was updated successfully
+                if 'profile_pic' in request.FILES:
+                    picture = request.FILES['profile_pic']
+                    if '.jpg' in picture.name or '.png' in picture.name:
+                        # Uploading Photo to Cloudinary in "user_photo" folder with id of username, it updates and replaces old version of file
+                        response = cloudinary.uploader.upload(request.FILES['profile_pic'],
+                                                            folder="user_photo/",
+                                                            public_id=user.username)
+                        profile.profile_pic = response['secure_url']
+                        profile_pic = response['secure_url']
+                    else:
+                        profile_update = False
+                        image_error = "Invalid Image File Type! Only .jpg and .png files supported!"
+                if profile_update:
+                    # Hash password and save user object
+                    user.set_password(user_form_details.password)
+                    user.save(update_fields=['password'])
+                    # Save user profile form date to database
+                    profile.user = user
+                    profile.save(update_fields=['user','profile_pic']) # Only update "user" and "profile_pic" fields of UserProfile instance
+            except (User.DoesNotExist, UserProfile.DoesNotExist) as e:
+                return HttpResponseRedirect(reverse('index'))
         else:
             # Print problems to the terminal in case of invalid forms
             print(user_form.errors, profile_form.errors)
@@ -125,7 +150,7 @@ def profile(request):
         profile_form = UserProfileForm()
 
     # Render template depending on the context.
-    return render(request, 'eventually/profile.html', {'user_form': user_form,
+    return render(request, 'eventually/user_profile.html', {'user_form': user_form,
                                                         'profile_form': profile_form,
                                                         'profile_update': profile_update,
                                                         'image_error': image_error})
@@ -317,87 +342,3 @@ def account_confirmation(request):
 
 def contact(request):
     return HttpResponse("Contact us page showing Team behind Eventually")
-
-
-# 1. retrieve user's details
-# 2. check if user sent in confirmation code from the form
-# 3. if user entered confirmation code, get code and check if database data matches the code
-# 4. if database data does not match the code, send response to the user with appropriate message
-# 5. if user does not exist, return appropriate message
-# def validate_user_registeration(request):
-
-def send_mail_api(username, email, ver_code):
-    print(username, email, ver_code)
-    subject, from_email, to = 'Verification Code', 'events@eventually.com', email
-    text_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
-    html_content = "<strong>Dear %s, \nPlease enter your verification code: %s </strong>" % (username, ver_code)
-    message = EmailMultiAlternatives(subject, text_content, from_email, [to])
-    message.attach_alternative(html_content, "text/html")
-    message.send()
-
-
-def send_mail_forgot_password(email, ver_code):
-    send_mail("Reset your password", "Please enter this code to reset to your password : %s" % ver_code,
-              "events@eventually.com", [email], fail_silently=True)
-
-
-# Apologies for the ambiguity between forgot_password and password reset. Forgot_password is the first page
-# where users get to enter their email address. Whereas password reset is the next page where the user
-# actually enters the new passcode and verification code
-def forgot_password(request):
-    # Possibly better option is to use a form field.
-    if request.method == 'POST':
-        email = request.POST.get('email')
-
-        ver_code = generate_random_code()
-        send_mail_forgot_password(email, ver_code)
-        request.session["email"] = email
-        try:
-            user = User.objects.get(email=email)
-            profile = UserProfile.objects.get(user=user)
-            profile.ver_code = ver_code
-            profile.save()
-
-            return HttpResponseRedirect(reverse('password_reset'))
-        except User.DoesNotExist:
-            return render(request, 'eventually/forgot_password.html',
-                          {'error': 'Email address is incorrect'})
-        except UserProfile.DoesNotExist:
-            return render(request, 'eventually/forgot_password.html',
-                          {'error': 'Email address is incorrect'})
-
-    return render(request, 'eventually/forgot_password.html', {})
-
-
-def password_reset(request):
-    if request.method == 'POST':
-        email = request.session["email"]
-        password = request.POST.get('password')
-        ver_code = request.POST.get('ver_code')
-
-        try:
-            user = User.objects.get(email=email)
-            profile = UserProfile.objects.get(user=user)
-
-            if profile:
-                if profile.ver_code == ver_code:
-                    user.set_password(password)
-                    user.save()
-                    return render(request, 'eventually/index.html', {'user': user})
-                else:
-                    return render(request, 'eventually/forgot_password_confirmation.html',
-                                  {'error': 'Verification code is incorrect'})
-            else:
-                return render(request, 'eventually/forgot_password_confirmation.html',
-                              {'error': 'Email address is incorrect'})
-        except User.DoesNotExist:
-            return render(request, 'eventually/forgot_password_confirmation.html',
-                          {'error': 'Email address is incorrect'})
-
-    return render(request, 'eventually/forgot_password_confirmation.html', {})
-
-
-@login_required
-def sign_out(request):
-    logout(request)
-    return HttpResponseRedirect(reverse('index'))
