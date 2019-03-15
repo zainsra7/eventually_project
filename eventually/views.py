@@ -606,3 +606,6 @@ def password_reset(request):
 
     return render(request, 'eventually/forgot_password_confirmation.html', {})
 
+def contact(request):
+    return HttpResponse("Contact us page showing Team behind Eventually")
+
