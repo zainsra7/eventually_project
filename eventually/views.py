@@ -1,7 +1,7 @@
 import cloudinary
 import qrcode
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from eventually.forms import ProfileForm, EventForm, EventImageForm
@@ -392,7 +392,6 @@ def register(request):
                     user_profile.ver_code = generate_random_code()
                     send_mail_api(user_profile.user.username, user_profile.user.email, user_profile.ver_code)
 
-                    # Hash password and save user object
                     # user.set_password(user.password)
                     user.save()
                     request.session['profile_id'] = user.id
@@ -618,3 +617,28 @@ def contact(request):
 
 def about(request):
     return HttpResponse("WHY")
+
+
+def send_event_owner_mail(request):
+    message = request.GET.get('message', None)
+    to_email = request.GET.get('to_email', None)
+    from_email = request.GET.get('from_email', None)
+    from_first_name = request.GET.get('first_name', None)
+    from_last_name = request.GET.get('last_name', None)
+
+    title = '[Eventually] New message from %s %s' % (from_first_name, from_last_name)
+    message = "You have a new message. Here are the contents : \n\n %s" % message
+    try:
+        send_mail_forgot_password('sammyplexus@gmail.com', 123123)
+        send_mail(title, message, 'messages@eventually.com', ['samuelagbede@outlook.com'], fail_silently=False)
+        data = {
+            'is_sent': True
+        }
+        print("Sent")
+        return JsonResponse(data)
+    except:
+        data = {
+            'is_sent': False
+        }
+        print("Unsent")
+        return JsonResponse(data)

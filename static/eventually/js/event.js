@@ -68,4 +68,35 @@ $(document).ready(function () {
             }
         });
     });
+
+    $('#send-host-mail').click(function(){
+
+
+        var message = $('#message').val();
+        var to_email = $('#message').data('email-address');
+        var from_email = $('#message').data('from');
+        var from_first_name = $('#message').data('from-firstname');
+        var from_last_name = $('#message').data('from-lastname');
+
+
+        $.ajax({
+        url: 'http://127.0.0.1:8000/eventually/send_event_owner_mail',
+        data: {
+          'message': message,
+          'to_email': to_email,
+          'from_email': from_email,
+          'from_first_name': from_first_name,
+          'from_last_name': from_last_name
+        },
+        dataType: 'json',
+        success: function (data) {
+          if (data.is_sent) {
+            alert("Email sent");
+          } else {
+            alert("Email not sent");
+          }
+        }
+      });
+
+    })
 });

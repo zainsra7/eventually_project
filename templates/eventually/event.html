@@ -123,8 +123,8 @@ Event
           <form class="col s12">
             <div class="row">
               <div class="input-field col s12">
-                <textarea id="message" class="materialize-textarea"></textarea>
-                <label for="message">Message</label>
+                <textarea id="message" class="materialize-textarea" data-email-address = {{ event.host.user.email }} data-from = {{request.user.email }} data-from-firstname = {{request.user.first_name}} data-from-lastname = {{request.user_last_name}}></textarea>
+                <label for="message"  >Message</label>
               </div>
             </div>
           </form>
@@ -133,7 +133,7 @@ Event
 
       <div class="modal-footer">
         <a class="modal-close waves-effect waves-red btn-flat">CANCEL</a>
-        <a class="modal-close waves-effect waves-green btn-flat">SEND</a>
+        <a class="modal-close waves-effect waves-green btn-flat" id = "send-host-mail">SEND</a>
       </div>
 
     </div>
