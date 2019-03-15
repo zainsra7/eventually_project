@@ -5,6 +5,10 @@ $(document).ready(function(){
       $("#pin-btn").hide();
       $(".host-search-bar").show("show");
     });
+
+    $("#search-btn").click(function(){
+      $("#search-form").submit();
+    });
 });
 
 //Following scripts are from csstricks.com to generate typewriter effect

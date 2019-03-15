@@ -138,6 +138,14 @@ def host(request):
     image_error = ""
 
     if request.method == "POST":
+        date = request.POST.get('date')
+        time = request.POST.get('time')
+        if date and time:
+            print(date)
+            print(time)
+            event_date = datetime.strptime(date + " " + time, '%Y/%m/%d %H:%S')
+            print(event_date)
+            print(event_date.date())
         event_form = EventForm(data=request.POST)
         event_image_form = EventImageForm(data=request.POST)
 
@@ -157,6 +165,7 @@ def host(request):
                     event_created = False
                     image_error = "Invalid Image File Type! Only .jpg and .png files supported!"
             if event_created:
+                event.date = event_date.date()
                 event.host = UserProfile.objects.get(user=request.user)
                 event.save()
         else:

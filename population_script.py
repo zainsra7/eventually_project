@@ -440,8 +440,9 @@ def populate():
 def add_event(event):
     u = User.objects.get(username=event["host"])
     up = UserProfile.objects.get_or_create(user=u)[0]
-    event_date = datetime.strptime(event['date'], '%Y/%m/%d')
-    e = Event.objects.get_or_create(title=event["title"], host=up, date=event_date.date(), time=event['time'], location=event['location'], description=event['description'],image=event['image'], capacity=event['capacity'], address=event['address'], fb_page=event['fb_page'], attendees=event['attendees'])[0]
+    event_date = datetime.strptime(event['date'] + " " + event['time'], '%Y/%m/%d %H:%M')
+    print(event_date)
+    e = Event.objects.get_or_create(title=event["title"], host=up, date=event_date, time=event['time'], location=event['post_code'], description=event['description'],image=event['image'], capacity=event['capacity'], address=event['address'], fb_page=event['fb_page'], attendees=event['attendees'])[0]
     e.save()
     return e
 
