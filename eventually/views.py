@@ -512,3 +512,97 @@ def send_mail_forgot_password(email, ver_code):
 
 def generate_random_code():
     return random.randint(100000, 999999)
+
+
+def account_confirmation(request):
+    if request.method == 'POST':
+        ver_code = request.POST.get('ver_code')
+
+        id = request.session['profile_id']
+        password = request.session['password']
+        try:
+            user = User.objects.get(id=id)
+
+            profile = UserProfile.objects.get(user=user)
+
+            if ver_code == profile.ver_code:
+                print(user.username, user.password)
+                user.active = True
+                user.save()
+                logged_in_user = authenticate(request, username=user.username, password=password)
+                print(logged_in_user)
+
+                if logged_in_user:
+                    if logged_in_user.is_active:
+                        login(request, logged_in_user)
+
+                        profile.approved = True
+                        profile.save()
+                        return HttpResponseRedirect(reverse('index'))
+            else:
+                return render(request, 'eventually/account_confirmation.html',
+                              {'error': 'Please enter a valid code. Wrong code inputted.'})
+        except User.DoesNotExist:
+            return HttpResponseRedirect(reverse('register'))
+
+    return render(request, 'eventually/account_confirmation.html', {})
+
+
+
+
+
+# Apologies for the ambiguity between forgot_password and password reset. Forgot_password is the first page
+# where users get to enter their email address. Whereas password reset is the next page where the user
+# actually enters the new passcode and verification code
+def forgot_password(request):
+    # Possibly better option is to use a form field.
+    if request.method == 'POST':
+        email = request.POST.get('email')
+
+        ver_code = generate_random_code()
+        send_mail_forgot_password(email, ver_code)
+        request.session["email"] = email
+        try:
+            user = User.objects.get(email=email)
+            profile = UserProfile.objects.get(user=user)
+            profile.ver_code = ver_code
+            profile.save()
+
+            return HttpResponseRedirect(reverse('password_reset'))
+        except User.DoesNotExist:
+            return render(request, 'eventually/forgot_password.html',
+                          {'error': 'Email address is incorrect'})
+        except UserProfile.DoesNotExist:
+            return render(request, 'eventually/forgot_password.html',
+                          {'error': 'Email address is incorrect'})
+
+    return render(request, 'eventually/forgot_password.html', {})
+
+
+def password_reset(request):
+    if request.method == 'POST':
+        email = request.session["email"]
+        password = request.POST.get('password')
+        ver_code = request.POST.get('ver_code')
+
+        try:
+            user = User.objects.get(email=email)
+            profile = UserProfile.objects.get(user=user)
+
+            if profile:
+                if profile.ver_code == ver_code:
+                    user.set_password(password)
+                    user.save()
+                    return render(request, 'eventually/index.html', {'user': user})
+                else:
+                    return render(request, 'eventually/forgot_password_confirmation.html',
+                                  {'error': 'Verification code is incorrect'})
+            else:
+                return render(request, 'eventually/forgot_password_confirmation.html',
+                              {'error': 'Email address is incorrect'})
+        except User.DoesNotExist:
+            return render(request, 'eventually/forgot_password_confirmation.html',
+                          {'error': 'Email address is incorrect'})
+
+    return render(request, 'eventually/forgot_password_confirmation.html', {})
+
