@@ -6,8 +6,9 @@
 {% endblock %}
 
 {% block body_block %}
-    <h1>Please enter verification code sent your mail : {{ request.user.email }}</h1>
-
+    {% if email %}
+    <h1>Please enter verification code sent your mail : {{ email }}</h1>
+    {% endif %}
 
     <form action="{% url 'account_confirmation' %}" method="post">
         {% csrf_token %}

@@ -31,8 +31,7 @@ def index(request):
     # Fetch Popular Events from Database
     events = range(5)
     profile_pic = "/static/images/pickachu.png"
-    if request.user.is_authenticated():
-        profile_pic = UserProfile.objects.get(user=request.user).profile_pic
+
     context_dict = {'events': events, "profile_pic": profile_pic}
     response = render(request, 'eventually/index.html', context=context_dict)
     return response
@@ -168,12 +167,13 @@ def user_profile(request):
 def register(request):
     # Successful registration check
     registered = False
+    print('Register is called')
 
     # To display error if the uploaded picture is not valid
     image_error = ""
 
     if request.method == 'POST':
-
+        print('Post is called')
         password = request.POST.get('password')
         email_address = request.POST.get('email')
 
@@ -184,20 +184,31 @@ def register(request):
 
         # Check if forms are valid
         if user_form.is_valid() and profile_form.is_valid():
+            print('Form is valid')
             # Check if email address is not taken
             try:
-                users = User.objects.get(email=email_address)
+                print('Try to get users')
+                user = User.objects.get(email=email_address)
+
+                if user:
+                    return render(request, 'eventually/register.html', {'user_form': user_form,
+                                                                    'profile_form': profile_form,
+                                                                    'registered': registered,
+                                                                    'image_error': image_error,
+                                                                    'email_error': 'Email address is already taken'})
             except MultipleObjectsReturned:
+                print('Multiple objects returned')
                 return render(request, 'eventually/register.html', {'user_form': user_form,
                                                                     'profile_form': profile_form,
                                                                     'registered': registered,
                                                                     'image_error': image_error,
                                                                     'email_error': 'Email address is already taken'})
             except ObjectDoesNotExist:
+                print('Object does not exist')
                 # Save user's form data to database
                 user = user_form.save(commit=False)
                 user.set_password(password)
-                request.session['profile_id'] = user.id
+
                 # Save user profile form date to database
                 user_profile = profile_form.save(commit=False)
                 user_profile.approved = False
@@ -227,6 +238,8 @@ def register(request):
                     # Hash password and save user object
                     # user.set_password(user.password)
                     user.save()
+                    request.session['profile_id'] = user.id
+                    request.session['email'] = user.email
                     user_profile.user = user
                     user_profile.save()
 
@@ -270,12 +283,14 @@ def account_confirmation(request):
         id = request.session['profile_id']
         password = request.session['password']
         try:
+            print('id ', id)
             user = User.objects.get(id=id)
-
+            print('User ', user)
             profile = UserProfile.objects.get(user=user)
+            print('Profile ', profile)
 
             if ver_code == profile.ver_code:
-                print(user.username, user.password)
+                print('User details are ', user.username, user.password)
                 user.active = True
                 user.save()
                 logged_in_user = authenticate(request, username=user.username, password=password)
@@ -294,7 +309,8 @@ def account_confirmation(request):
         except User.DoesNotExist:
             return HttpResponseRedirect(reverse('register'))
 
-    return render(request, 'eventually/account_confirmation.html', {})
+    email = request.session['email']
+    return render(request, 'eventually/account_confirmation.html', {'email': email})
 
 
 def contact(request):
@@ -413,15 +429,16 @@ def user_login(request):
         # combination is valid - a User object is returned if it is
         user = authenticate(username=username, password=password)
 
-        try:
-            profile = UserProfile.objects.get(user=user)
-        except ObjectDoesNotExist:
-            return render(request, 'eventually/index.html', {'error': 'No user matches the details inputted'})
 
         # If we have a User object, the details are correct.
         # If None (Python's way of representing the absence of a value), no user
         # with matching crendentials was found
         if user:
+            try:
+                profile = UserProfile.objects.get(user=user)
+            except ObjectDoesNotExist:
+                return render(request, 'eventually/index.html', {'error': 'No user matches the details inputted'})
+
             if profile.approved is False:
                 # save user profile id to session
                 request.session['profile_id'] = user.id
@@ -441,7 +458,7 @@ def user_login(request):
         else:
             # Bad login details were provided, So we can't log the user in
             print("Invalid login details: {0}, {1}".format(username, password))
-            return HttpResponse("Invalid login details supplied.")
+            return render(request, 'eventually/index.html', {'error': 'No user matches the details inputted'})
 
     # The request is not HTTP POST, so display the login form
     # This scenario would most likely be a HTTP GET

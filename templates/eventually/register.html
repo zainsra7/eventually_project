@@ -10,7 +10,7 @@ Register
 <div class="register-body container w3-animate-zoom">
     <div class="card white darken-1">
         <form id="user_form" method="POST" action="{% url 'register' %}" enctype="multipart/form-data">
-
+            {% csrf_token %}
             <div class="card-content">
                 {% if email_error  %}
                         <strong style = "color:red;">A user with this email address already exists. Please use a different one</strong>
