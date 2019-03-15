@@ -548,9 +548,6 @@ def account_confirmation(request):
     return render(request, 'eventually/account_confirmation.html', {})
 
 
-
-
-
 # Apologies for the ambiguity between forgot_password and password reset. Forgot_password is the first page
 # where users get to enter their email address. Whereas password reset is the next page where the user
 # actually enters the new passcode and verification code
@@ -606,6 +603,10 @@ def password_reset(request):
 
     return render(request, 'eventually/forgot_password_confirmation.html', {})
 
+
 def contact(request):
     return HttpResponse("Contact us page showing Team behind Eventually")
 
+
+def about(request):
+    return HttpResponse("WHY")

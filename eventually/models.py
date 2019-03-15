@@ -22,7 +22,7 @@ class Event(models.Model):
     date = models.DateField(default=now, blank=False)
     time = models.TimeField(default=now, blank=True)
     capacity = models.PositiveSmallIntegerField(default=1, validators=[MinValueValidator(1, "Number of Attendees must be a positive number!")])
-    fb_page = models.CharField(blank=True, max_length=200) #Event FB_Page Name
+    fb_page = models.CharField(blank=True, max_length=200) # Event FB_Page Name
     host = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     attendees = models.IntegerField(default=0, blank=True)
     
