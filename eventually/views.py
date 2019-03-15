@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from datetime import datetime
+from django.contrib.auth import update_session_auth_hash
 
 from django.core.mail import \
     send_mail, EmailMultiAlternatives
@@ -29,18 +30,21 @@ cloudinary.config(
     api_secret='B9r_lNfKaNy2Z8bK3d9wDksxhOs'
 )
 
-
-def index(request):
+# Returns top five popular events based on number of attendees
+def popular_events():
     # Fetch all events from database
     events = Event.objects.all()
 
     # Get only five most popular events
     events = events.order_by('-attendees')[:5]
 
+    return events
+
+def index(request):
     profile_pic = "/static/images/pickachu.png"
     if request.user.is_authenticated():
         profile_pic = UserProfile.objects.get(user=request.user).profile_pic
-    context_dict = {'events': events, "profile_pic": profile_pic}
+    context_dict = {'events': popular_events(), "profile_pic": profile_pic}
     response = render(request, 'eventually/index.html', context=context_dict)
     return response
 
@@ -254,7 +258,7 @@ def join_event(request):
 
     return HttpResponse(event.attendees)
 
-
+# Function to let users edit their profile
 @login_required
 def user_profile(request):
     # Successful profile_update check
@@ -297,6 +301,7 @@ def user_profile(request):
                     # Hash password and save user object
                     user.set_password(user_form_details.password)
                     user.save(update_fields=['password'])
+                    update_session_auth_hash(request, user)  # To validate the user's session
                     # Save user profile form date to database
                     profile.user = user
                     profile.save(update_fields=['user',
@@ -428,27 +433,18 @@ def user_login(request):
     # If the request is a HTTP POST, try to pull out the relevant information
     if request.method == 'POST':
         # Gather the username and password provided by the user.
-        # This information is obtained from the login form.
-        # We use request.POST.get('<variable>') as opposed
-        # to request.POST['<variable>'], because the
-        # request.POST.get('<variable>') returns None if the
-        # value does not exist, while request.POST['<variable>']
-        # will raise a KeyError exception
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Use Django's machinery to attemp to see if the username/password
-        # combination is valid - a User object is returned if it is
+        # Get the User object
         user = authenticate(username=username, password=password)
 
         # If we have a User object, the details are correct.
-        # If None (Python's way of representing the absence of a value), no user
-        # with matching crendentials was found
         if user:
             try:
                 profile = UserProfile.objects.get(user=user)
             except ObjectDoesNotExist:
-                return render(request, 'eventually/index.html', {'error': 'No user matches the details inputted'})
+                return render(request, 'eventually/index.html', {'error': 'No user matches the details inputted', "events": popular_events()})
 
             if profile.approved is False:
                 # save user profile id to session
@@ -457,10 +453,8 @@ def user_login(request):
                 return HttpResponseRedirect(reverse('account_confirmation'))
             # Is the account active? It could have been disabled
             elif user.is_active:
-                # If the account is valid and active, we can log the user in
-                # We'll send the user back to the homepage
+                # Login the User and redirect to index
                 login(request, user)
-                # send_events_qr_code(username, user.email, "Fresh events!", event_date="16/12/2019", event_venue="The Moon!")
                 return HttpResponseRedirect(reverse('index'))
             else:
                 # An inactive account was used - no logging in!
@@ -468,14 +462,14 @@ def user_login(request):
         else:
             # Bad login details were provided, So we can't log the user in
             print("Invalid login details: {0}, {1}".format(username, password))
-            return render(request, 'eventually/index.html', {'error': 'No user matches the details inputted'})
+            return render(request, 'eventually/index.html', {'error': 'No user matches the details inputted', "events": popular_events()})
 
     # The request is not HTTP POST, so display the login form
     # This scenario would most likely be a HTTP GET
     else:
         # No context variables to pass to the template system, hence the
         # blank dictionary object
-        return render(request, 'eventually/index.html', {})
+        return render(request, 'eventually/index.html', {"events": popular_events()})
 
 
 def send_mail_api(username, email, ver_code):
