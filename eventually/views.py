@@ -4,9 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from eventually.forms import UserForm, UserProfileForm, ProfileForm, EventForm, EventImageForm
+from eventually.forms import ProfileForm, EventForm, EventImageForm
 from django.contrib.staticfiles.templatetags.staticfiles import static
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from eventually.models import UserProfile, Event, Attendee, Tag
@@ -15,12 +14,11 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from datetime import datetime
 
-from django.core.mail import\
+from django.core.mail import \
     send_mail, EmailMultiAlternatives
 
 from eventually.forms import UserForm, UserProfileForm
 import random
-
 import io
 
 from eventually.models import UserProfile
@@ -30,6 +28,7 @@ cloudinary.config(
     api_key='398391779669939',
     api_secret='B9r_lNfKaNy2Z8bK3d9wDksxhOs'
 )
+
 
 def index(request):
     # Fetch all events from database
@@ -41,9 +40,10 @@ def index(request):
     profile_pic = "/static/images/pickachu.png"
     if request.user.is_authenticated():
         profile_pic = UserProfile.objects.get(user=request.user).profile_pic
-    context_dict = {'events': events, "profile_pic" : profile_pic}
+    context_dict = {'events': events, "profile_pic": profile_pic}
     response = render(request, 'eventually/index.html', context=context_dict)
     return response
+
 
 def dashboard(request):
     # GET requests
@@ -56,16 +56,17 @@ def dashboard(request):
     user_profile = UserProfile.objects.get(user=request.user)
 
     # Fetch all events from database
-    event_list_event = Event.objects.filter(Q(title__contains = search) | Q(location__contains = search) | Q(address__contains = search))
-    event_tag_id = Tag.objects.filter(tag__contains = search).values_list('event', flat=True)
+    event_list_event = Event.objects.filter(
+        Q(title__contains=search) | Q(location__contains=search) | Q(address__contains=search))
+    event_tag_id = Tag.objects.filter(tag__contains=search).values_list('event', flat=True)
     event_list_tag = Event.objects.filter(id__in=event_tag_id)
     event_list = event_list_event | event_list_tag
 
     # Get relevant events based on selected filter
     if (filter_value == "upcoming"):
-        event_filtered = event_list.filter(date__gte = datetime.now())
+        event_filtered = event_list.filter(date__gte=datetime.now())
     elif (filter_value == "past"):
-        event_filtered = event_list.filter(date__lte = datetime.now())
+        event_filtered = event_list.filter(date__lte=datetime.now())
     else:
         event_filtered = event_list
 
@@ -95,9 +96,12 @@ def dashboard(request):
     except Event.DoesNotExist:
         events = None
 
-    response = render(request, 'eventually/dashboard.html', context={'events': events, 'search': search, 'type_value': type_value, 'filter_value': filter_value, 'sort_value': sort_value})
+    response = render(request, 'eventually/dashboard.html',
+                      context={'events': events, 'search': search, 'type_value': type_value,
+                               'filter_value': filter_value, 'sort_value': sort_value})
     return response
-    
+
+
 def search(request):
     # GET requests
     search = request.GET.get('search', "")
@@ -105,16 +109,17 @@ def search(request):
     sort_value = request.GET.get('sort', "date")
 
     # Fetch all events from database
-    event_list_event = Event.objects.filter(Q(title__contains = search) | Q(location__contains = search) | Q(address__contains = search))
-    event_tag_id = Tag.objects.filter(tag__contains = search).values_list('event', flat=True)
+    event_list_event = Event.objects.filter(
+        Q(title__contains=search) | Q(location__contains=search) | Q(address__contains=search))
+    event_tag_id = Tag.objects.filter(tag__contains=search).values_list('event', flat=True)
     event_list_tag = Event.objects.filter(id__in=event_tag_id)
     event_list = event_list_event | event_list_tag
 
     # Get relevant events based on selected filter
-    if (filter_value == "upcoming"):
-        event_filtered = event_list.filter(date__gte = datetime.now())
-    elif (filter_value == "past"):
-        event_filtered = event_list.filter(date__lte = datetime.now())
+    if filter_value == "upcoming":
+        event_filtered = event_list.filter(date__gte=datetime.now())
+    elif filter_value == "past":
+        event_filtered = event_list.filter(date__lte=datetime.now())
     else:
         event_filtered = event_list
 
@@ -137,7 +142,9 @@ def search(request):
     except Event.DoesNotExist:
         events = None
 
-    response = render(request, 'eventually/search.html', context={'events': events, 'search': search, 'filter_value': filter_value, 'sort_value': sort_value})
+    response = render(request, 'eventually/search.html',
+                      context={'events': events, 'search': search, 'filter_value': filter_value,
+                               'sort_value': sort_value})
     return response
 
 
@@ -154,7 +161,7 @@ def host(request):
         event_image_form = EventImageForm(data=request.POST)
 
         if event_form.is_valid() and event_image_form.is_valid():
-            event = event_form.save(commit=False) # Get Event Object
+            event = event_form.save(commit=False)  # Get Event Object
 
             event_created = True
 
@@ -162,8 +169,8 @@ def host(request):
                 image = request.FILES['image']
                 if '.jpg' in image.name or '.png' in image.name:
                     response = cloudinary.uploader.upload(request.FILES['image'],
-                                                        folder="event_photo/",
-                                                        public_id=event.id)
+                                                          folder="event_photo/",
+                                                          public_id=event.id)
                     event.image = response['secure_url']
                 else:
                     event_created = False
@@ -177,7 +184,9 @@ def host(request):
         # Return a blank form
         event_form = EventForm()
         event_image_form = EventImageForm()
-    return render(request,'eventually/host.html',{"event_form": event_form, "event_image_form" : event_image_form, "image_error": image_error, "event_created": event_created})
+    return render(request, 'eventually/host.html',
+                  {"event_form": event_form, "event_image_form": event_image_form, "image_error": image_error,
+                   "event_created": event_created})
 
 
 def event(request, event_id):
@@ -205,6 +214,7 @@ def event(request, event_id):
     context_dict['closed'] = closed
 
     return render(request, 'eventually/event.html', context_dict)
+
 
 @login_required
 def join_event(request):
@@ -234,6 +244,7 @@ def join_event(request):
                 event.save()
 
     return HttpResponse(event.attendees)
+
 
 @login_required
 def user_profile(request):
@@ -266,8 +277,8 @@ def user_profile(request):
                     if '.jpg' in picture.name or '.png' in picture.name:
                         # Uploading Photo to Cloudinary in "user_photo" folder with id of username, it updates and replaces old version of file
                         response = cloudinary.uploader.upload(request.FILES['profile_pic'],
-                                                            folder="user_photo/",
-                                                            public_id=user.username)
+                                                              folder="user_photo/",
+                                                              public_id=user.username)
                         profile.profile_pic = response['secure_url']
                         profile_pic = response['secure_url']
                     else:
@@ -279,7 +290,8 @@ def user_profile(request):
                     user.save(update_fields=['password'])
                     # Save user profile form date to database
                     profile.user = user
-                    profile.save(update_fields=['user','profile_pic']) # Only update "user" and "profile_pic" fields of UserProfile instance
+                    profile.save(update_fields=['user',
+                                                'profile_pic'])  # Only update "user" and "profile_pic" fields of UserProfile instance
             except (User.DoesNotExist, UserProfile.DoesNotExist) as e:
                 return HttpResponseRedirect(reverse('index'))
         else:
@@ -292,10 +304,10 @@ def user_profile(request):
 
     # Render template depending on the context.
     return render(request, 'eventually/user_profile.html', {'user_form': user_form,
-                                                        'profile_form': profile_form,
-                                                        'profile_update': profile_update,
-                                                        'profile_pic': profile_pic,
-                                                        'image_error': image_error})
+                                                            'profile_form': profile_form,
+                                                            'profile_update': profile_update,
+                                                            'profile_pic': profile_pic,
+                                                            'image_error': image_error})
 
 
 # Sign Up flow 1. Show user form for registration 2. Validate form upon submission and return errors if any 3. If
@@ -328,10 +340,10 @@ def register(request):
 
                 if user:
                     return render(request, 'eventually/register.html', {'user_form': user_form,
-                                                                    'profile_form': profile_form,
-                                                                    'registered': registered,
-                                                                    'image_error': image_error,
-                                                                    'email_error': 'Email address is already taken'})
+                                                                        'profile_form': profile_form,
+                                                                        'registered': registered,
+                                                                        'image_error': image_error,
+                                                                        'email_error': 'Email address is already taken'})
             except MultipleObjectsReturned:
                 print('Multiple objects returned')
                 return render(request, 'eventually/register.html', {'user_form': user_form,
@@ -395,6 +407,7 @@ def register(request):
                                                         'registered': registered,
                                                         'image_error': image_error})
 
+
 @login_required
 def user_logout(request):
     # Since we know the user is logged in, we can now just log them out.
@@ -419,7 +432,6 @@ def user_login(request):
         # Use Django's machinery to attemp to see if the username/password
         # combination is valid - a User object is returned if it is
         user = authenticate(username=username, password=password)
-
 
         # If we have a User object, the details are correct.
         # If None (Python's way of representing the absence of a value), no user
@@ -457,3 +469,42 @@ def user_login(request):
         # No context variables to pass to the template system, hence the
         # blank dictionary object
         return render(request, 'eventually/index.html', {})
+
+
+def send_mail_api(username, email, ver_code):
+    print(username, email, ver_code)
+    subject, from_email, to = 'Verification Code', 'events@eventually.com', email
+    text_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
+    html_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
+    message = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    message.attach_alternative(html_content, "text/html")
+    message.send()
+
+
+def send_events_qr_code(username, email, event_name, event_date, event_venue):
+    image = qrcode.make("Name : Sam. Event : Event 2")
+    imageByteArray = io.BytesIO()
+    image.save(imageByteArray, format='PNG')
+    image_modified = imageByteArray.getvalue()
+
+    subject, from_email, to = 'Ticket for %s ' % event_name, 'events@eventually.com', email
+    text_content = "Dear %s, Thanks for registering. Please contact customer care for ticket" % username
+    html_content = '<p>Dear %s, Thanks for registering for %s. Please find attached your special QR invitation. ' \
+                   'Scan ' \
+                   'this at the venue.<p> ' \
+                   '<br>' \
+                   '<br>' \
+                   '<strong>Event details</strong> <br>' \
+                   'Event Name : %s <br>' \
+                   'Event Date : %s <br>' \
+                   'Event Venue : %s <br>' % (username, event_name, event_name, event_date, event_venue)
+    message = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    message.attach_alternative(html_content, "text/html")
+
+    message.attach('sam.png', image_modified, 'image/png')
+    message.send()
+
+
+def send_mail_forgot_password(email, ver_code):
+    send_mail("Reset your password", "Please enter this code to reset to your password : %s" % ver_code,
+              "events@eventually.com", [email], fail_silently=True)
