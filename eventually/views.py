@@ -508,3 +508,7 @@ def send_events_qr_code(username, email, event_name, event_date, event_venue):
 def send_mail_forgot_password(email, ver_code):
     send_mail("Reset your password", "Please enter this code to reset to your password : %s" % ver_code,
               "events@eventually.com", [email], fail_silently=True)
+
+
+def generate_random_code():
+    return random.randint(100000, 999999)
