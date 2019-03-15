@@ -17,7 +17,7 @@ class Event(models.Model):
     title = models.CharField(max_length=200)
     description = models.CharField(max_length=5000)
     image = models.URLField(blank=True)
-    post_code = models.CharField(max_length=8, validators=[MinLengthValidator(6, "UK PostCode is 6-8 Characters")])  # PostalCode
+    location = models.CharField(max_length=8, validators=[MinLengthValidator(6, "UK PostCode is 6-8 Characters")])  # PostalCode
     address = models.CharField(max_length=2000)   # Complete Address
     date = models.DateField(default=now, blank=False)
     time = models.TimeField(default=now, blank=True)

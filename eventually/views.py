@@ -8,7 +8,12 @@ from eventually.forms import UserForm, UserProfileForm, ProfileForm, EventForm, 
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from eventually.models import UserProfile, Event, Attendee, Tag
 from django.urls import reverse
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Q
+from datetime import datetime
 
 from django.core.mail import\
     send_mail, EmailMultiAlternatives
@@ -26,30 +31,113 @@ cloudinary.config(
     api_secret='B9r_lNfKaNy2Z8bK3d9wDksxhOs'
 )
 
-
 def index(request):
-    # Fetch Popular Events from Database
-    events = range(5)
-    profile_pic = "/static/images/pickachu.png"
+    # Fetch all events from database
+    events = Event.objects.all()
 
-    context_dict = {'events': events, "profile_pic": profile_pic}
+    # Get only five most popular events
+    events = events.order_by('-attendees')[:5]
+
+    profile_pic = "/static/images/pickachu.png"
+    if request.user.is_authenticated():
+        profile_pic = UserProfile.objects.get(user=request.user).profile_pic
+    context_dict = {'events': events, "profile_pic" : profile_pic}
     response = render(request, 'eventually/index.html', context=context_dict)
     return response
 
-
-@login_required
 def dashboard(request):
-    # Fetch Popular Events from Database
-    events = range(9)
-    context_dict = {'events': events, }
-    response = render(request, 'eventually/dashboard.html', context=context_dict)
+    # GET requests
+    search = request.GET.get('search', "")
+    type_value = request.GET.get('type', "joined")
+    filter_value = request.GET.get('filter', "upcoming")
+    sort_value = request.GET.get('sort', "date")
+
+    # Get current user
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    # Fetch all events from database
+    event_list_event = Event.objects.filter(Q(title__contains = search) | Q(location__contains = search) | Q(address__contains = search))
+    event_tag_id = Tag.objects.filter(tag__contains = search).values_list('event', flat=True)
+    event_list_tag = Event.objects.filter(id__in=event_tag_id)
+    event_list = event_list_event | event_list_tag
+
+    # Get relevant events based on selected filter
+    if (filter_value == "upcoming"):
+        event_filtered = event_list.filter(date__gte = datetime.now())
+    elif (filter_value == "past"):
+        event_filtered = event_list.filter(date__lte = datetime.now())
+    else:
+        event_filtered = event_list
+
+    # Get relevant events based on selected sort
+    if (sort_value == "date"):
+        event_sorted = event_filtered.order_by('-date')
+    else:
+        event_sorted = event_filtered.order_by('-attendees')
+
+    # Get relevant events based on selected type
+    if (type_value == "joined"):
+        joined = Attendee.objects.filter(user=user_profile).values_list('event', flat=True)
+        event_selected = event_sorted.filter(id__in=joined)
+    else:
+        event_selected = event_sorted.filter(host=user_profile)
+
+    # Pagination
+    page = request.GET.get('page', 1)
+    paginator = Paginator(event_selected, 9)
+
+    try:
+        events = paginator.page(page)
+    except PageNotAnInteger:
+        events = paginator.page(1)
+    except EmptyPage:
+        events = paginator.page(paginator.num_pages)
+    except Event.DoesNotExist:
+        events = None
+
+    response = render(request, 'eventually/dashboard.html', context={'events': events, 'search': search, 'type_value': type_value, 'filter_value': filter_value, 'sort_value': sort_value})
     return response
-
-
+    
 def search(request):
-    events = range(5)
-    context_dict = {'events': events, }
-    response = render(request, 'eventually/search.html', context=context_dict)
+    # GET requests
+    search = request.GET.get('search', "")
+    filter_value = request.GET.get('filter', "upcoming")
+    sort_value = request.GET.get('sort', "date")
+
+    # Fetch all events from database
+    event_list_event = Event.objects.filter(Q(title__contains = search) | Q(location__contains = search) | Q(address__contains = search))
+    event_tag_id = Tag.objects.filter(tag__contains = search).values_list('event', flat=True)
+    event_list_tag = Event.objects.filter(id__in=event_tag_id)
+    event_list = event_list_event | event_list_tag
+
+    # Get relevant events based on selected filter
+    if (filter_value == "upcoming"):
+        event_filtered = event_list.filter(date__gte = datetime.now())
+    elif (filter_value == "past"):
+        event_filtered = event_list.filter(date__lte = datetime.now())
+    else:
+        event_filtered = event_list
+
+    # Get relevant events based on selected sort
+    if (sort_value == "date"):
+        event_sorted = event_filtered.order_by('-date')
+    else:
+        event_sorted = event_filtered.order_by('-attendees')
+
+    # Pagination
+    page = request.GET.get('page', 1)
+    paginator = Paginator(event_sorted, 5)
+
+    try:
+        events = paginator.page(page)
+    except PageNotAnInteger:
+        events = paginator.page(1)
+    except EmptyPage:
+        events = paginator.page(paginator.num_pages)
+    except Event.DoesNotExist:
+        events = None
+
+    response = render(request, 'eventually/search.html', context={'events': events, 'search': search, 'filter_value': filter_value, 'sort_value': sort_value})
     return response
 
 
@@ -66,7 +154,7 @@ def host(request):
         event_image_form = EventImageForm(data=request.POST)
 
         if event_form.is_valid() and event_image_form.is_valid():
-            event = event_form.save(commit=False)  # Get Event Object
+            event = event_form.save(commit=False) # Get Event Object
 
             event_created = True
 
@@ -74,8 +162,8 @@ def host(request):
                 image = request.FILES['image']
                 if '.jpg' in image.name or '.png' in image.name:
                     response = cloudinary.uploader.upload(request.FILES['image'],
-                                                          folder="event_photo/",
-                                                          public_id=event.id)
+                                                        folder="event_photo/",
+                                                        public_id=event.id)
                     event.image = response['secure_url']
                 else:
                     event_created = False
@@ -89,14 +177,63 @@ def host(request):
         # Return a blank form
         event_form = EventForm()
         event_image_form = EventImageForm()
-    return render(request, 'eventually/host.html',
-                  {"event_form": event_form, "event_image_form": event_image_form, "image_error": image_error,
-                   "event_created": event_created})
+    return render(request,'eventually/host.html',{"event_form": event_form, "event_image_form" : event_image_form, "image_error": image_error, "event_created": event_created})
 
 
-def event(request):
-    return render(request, 'eventually/event.html', {})
+def event(request, event_id):
+    context_dict = {}
+    try:
+        # Get event and tags based on ID
+        event = Event.objects.get(id=event_id)
+        tags = Tag.objects.filter(event=event)
+        try:
+            # Check if user has already joined event
+            user_profile = UserProfile.objects.get(user=request.user)
+            joined = Attendee.objects.filter(event=event).filter(user=user_profile)
+        except:
+            joined = None
 
+        context_dict['event'] = event
+        context_dict['joined'] = joined
+        context_dict['tags'] = tags
+    except:
+        context_dict['event'] = None
+        context_dict['joined'] = None
+        context_dict['tags'] = None
+
+    closed = (datetime.now().date() > event.date.date() and datetime.now().time() > event.date.time())
+    context_dict['closed'] = closed
+
+    return render(request, 'eventually/event.html', context_dict)
+
+@login_required
+def join_event(request):
+    event_id = None
+
+    # Get event ID
+    if request.method == 'GET':
+        event_id = request.GET['event_id']
+
+    if event_id:
+        # Get event based on ID
+        event = Event.objects.get(id=int(event_id))
+
+        if event:
+            user_profile = UserProfile.objects.get(user=request.user)
+
+            if user_profile:
+                # Add/Delete user as attendee of event in Attendee model
+                try:
+                    attendee = Attendee(event=event, user=user_profile)
+                    attendee.save()
+                except:
+                    Attendee.objects.filter(Q(event=event) & Q(user=user_profile)).delete()
+
+                # Update number of attendees in Event model
+                event.attendees = Attendee.objects.filter(event=event).count()
+                event.save()
+
+    return HttpResponse(event.attendees)
 
 @login_required
 def user_profile(request):
@@ -129,8 +266,8 @@ def user_profile(request):
                     if '.jpg' in picture.name or '.png' in picture.name:
                         # Uploading Photo to Cloudinary in "user_photo" folder with id of username, it updates and replaces old version of file
                         response = cloudinary.uploader.upload(request.FILES['profile_pic'],
-                                                              folder="user_photo/",
-                                                              public_id=user.username)
+                                                            folder="user_photo/",
+                                                            public_id=user.username)
                         profile.profile_pic = response['secure_url']
                         profile_pic = response['secure_url']
                     else:
@@ -142,8 +279,7 @@ def user_profile(request):
                     user.save(update_fields=['password'])
                     # Save user profile form date to database
                     profile.user = user
-                    profile.save(update_fields=['user',
-                                                'profile_pic'])  # Only update "user" and "profile_pic" fields of UserProfile instance
+                    profile.save(update_fields=['user','profile_pic']) # Only update "user" and "profile_pic" fields of UserProfile instance
             except (User.DoesNotExist, UserProfile.DoesNotExist) as e:
                 return HttpResponseRedirect(reverse('index'))
         else:
@@ -156,9 +292,10 @@ def user_profile(request):
 
     # Render template depending on the context.
     return render(request, 'eventually/user_profile.html', {'user_form': user_form,
-                                                            'profile_form': profile_form,
-                                                            'profile_update': profile_update,
-                                                            'image_error': image_error})
+                                                        'profile_form': profile_form,
+                                                        'profile_update': profile_update,
+                                                        'profile_pic': profile_pic,
+                                                        'image_error': image_error})
 
 
 # Sign Up flow 1. Show user form for registration 2. Validate form upon submission and return errors if any 3. If
@@ -167,7 +304,6 @@ def user_profile(request):
 def register(request):
     # Successful registration check
     registered = False
-    print('Register is called')
 
     # To display error if the uploaded picture is not valid
     image_error = ""
@@ -259,157 +395,12 @@ def register(request):
                                                         'registered': registered,
                                                         'image_error': image_error})
 
-
 @login_required
 def user_logout(request):
     # Since we know the user is logged in, we can now just log them out.
     logout(request)
     # Take the user back to the homepage
     return HttpResponseRedirect(reverse('index'))
-
-
-def about(request):
-    return HttpResponse("WHY")
-
-
-def generate_random_code():
-    return random.randint(100000, 999999)
-
-
-def account_confirmation(request):
-    if request.method == 'POST':
-        ver_code = request.POST.get('ver_code')
-
-        id = request.session['profile_id']
-        password = request.session['password']
-        try:
-            print('id ', id)
-            user = User.objects.get(id=id)
-            print('User ', user)
-            profile = UserProfile.objects.get(user=user)
-            print('Profile ', profile)
-
-            if ver_code == profile.ver_code:
-                print('User details are ', user.username, user.password)
-                user.active = True
-                user.save()
-                logged_in_user = authenticate(request, username=user.username, password=password)
-                print(logged_in_user)
-
-                if logged_in_user:
-                    if logged_in_user.is_active:
-                        login(request, logged_in_user)
-
-                        profile.approved = True
-                        profile.save()
-                        return HttpResponseRedirect(reverse('index'))
-            else:
-                return render(request, 'eventually/account_confirmation.html',
-                              {'error': 'Please enter a valid code. Wrong code inputted.'})
-        except User.DoesNotExist:
-            return HttpResponseRedirect(reverse('register'))
-
-    email = request.session['email']
-    return render(request, 'eventually/account_confirmation.html', {'email': email})
-
-
-def contact(request):
-    return HttpResponse("Contact us page showing Team behind Eventually")
-
-
-# Apologies for the ambiguity between forgot_password and password reset. Forgot_password is the first page
-# where users get to enter their email address. Whereas password reset is the next page where the user
-# actually enters the new passcode and verification code
-def forgot_password(request):
-    # Possibly better option is to use a form field.
-    if request.method == 'POST':
-        email = request.POST.get('email')
-
-        ver_code = generate_random_code()
-        send_mail_forgot_password(email, ver_code)
-        request.session["email"] = email
-        try:
-            user = User.objects.get(email=email)
-            profile = UserProfile.objects.get(user=user)
-            profile.ver_code = ver_code
-            profile.save()
-
-            return HttpResponseRedirect(reverse('password_reset'))
-        except User.DoesNotExist:
-            return render(request, 'eventually/forgot_password.html',
-                          {'error': 'Email address is incorrect'})
-        except UserProfile.DoesNotExist:
-            return render(request, 'eventually/forgot_password.html',
-                          {'error': 'Email address is incorrect'})
-
-    return render(request, 'eventually/forgot_password.html', {})
-
-
-def password_reset(request):
-    if request.method == 'POST':
-        email = request.session["email"]
-        password = request.POST.get('password')
-        ver_code = request.POST.get('ver_code')
-
-        try:
-            user = User.objects.get(email=email)
-            profile = UserProfile.objects.get(user=user)
-
-            if profile:
-                if profile.ver_code == ver_code:
-                    user.set_password(password)
-                    user.save()
-                    return render(request, 'eventually/index.html', {'user': user})
-                else:
-                    return render(request, 'eventually/forgot_password_confirmation.html',
-                                  {'error': 'Verification code is incorrect'})
-            else:
-                return render(request, 'eventually/forgot_password_confirmation.html',
-                              {'error': 'Email address is incorrect'})
-        except User.DoesNotExist:
-            return render(request, 'eventually/forgot_password_confirmation.html',
-                          {'error': 'Email address is incorrect'})
-
-    return render(request, 'eventually/forgot_password_confirmation.html', {})
-
-
-def send_mail_api(username, email, ver_code):
-    print(username, email, ver_code)
-    subject, from_email, to = 'Verification Code', 'events@eventually.com', email
-    text_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
-    html_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
-    message = EmailMultiAlternatives(subject, text_content, from_email, [to])
-    message.attach_alternative(html_content, "text/html")
-    message.send()
-
-
-def send_events_qr_code(username, email, event_name, event_date, event_venue):
-    image = qrcode.make("Name : Sam. Event : Event 2")
-    imageByteArray = io.BytesIO()
-    image.save(imageByteArray, format='PNG')
-    image_modified = imageByteArray.getvalue()
-
-    subject, from_email, to = 'Ticket for %s ' % event_name, 'events@eventually.com', email
-    text_content = "Dear %s, Thanks for registering. Please contact customer care for ticket" % username
-    html_content = '<p>Dear %s, Thanks for registering for %s. Please find attached your special QR invitation. ' \
-                   'Scan ' \
-                   'this at the venue.<p> ' \
-                   '<br>' \
-                   '<br>' \
-                   '<strong>Event details</strong> <br>' \
-                   'Event Name : %s <br>' \
-                   'Event Date : %s <br>' \
-                   'Event Venue : %s <br>' % (username, event_name, event_name, event_date, event_venue)
-    message = EmailMultiAlternatives(subject, text_content, from_email, [to])
-    message.attach_alternative(html_content, "text/html")
-
-    message.attach('sam.png', image_modified, 'image/png')
-    message.send()
-
-
-def send_mail_forgot_password(email, ver_code):
-    send_mail("Reset your password", "Please enter this code to reset to your password : %s" % ver_code,
-              "events@eventually.com", [email], fail_silently=True)
 
 
 def user_login(request):

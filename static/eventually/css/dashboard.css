@@ -1,13 +1,17 @@
-.dropdown-button {
+/* Search bar */
+
+.nav-wrapper {
+  flex: 2;
+}
+
+.btn {
   margin: auto 15px;
 }
 
-.pagination {
-  text-align: center;
-}
-
-#search-container, #events-container, #pagination-container {
-  margin-top: 40px;
+#type-field, #filter-field, #sort-field {
+  max-width: 120px;
+  display:flex;
+  align-items: center;
 }
 
 #search-container {
@@ -15,58 +19,74 @@
   align-items: center;
 }
 
-  
-/* Popular events section */
+#search-container, #events-container, #pagination-container {
+  margin-top: 40px;
+}
+
+
+/* Events */
 
 #events-container{
-  display: flex;
-  flex-wrap: wrap;
+  display: block;
   text-align: center;
-  justify-content: space-around;
+}
+
+
+/* Pagination */
+
+.pagination {
+  text-align: center;
+}
+
+
+/* Fallback */
+
+#no-events {
+  text-align: center;
 }
 
 
 /* Date CSS by Pali Madra @CodePen*/
+
 .date {
   background-color: #2196F3;
   float: right;
   position: relative;
   padding: 45px 25px 0px;
   margin-left: 2px;
-}
-
-.date .year{
+  }
+  
+  .date .year{
   display: block;
   position: absolute;
   right: -10px;
   top: 15px;
   -webkit-transform: rotate(-90deg);
   -moz-transform: rotate(-90deg);
-  font-weight:bold;
-}
+    font-weight:bold;
+  }
   
-.date .month {
+  .date .month {
   text-transform: uppercase;
   font-size: 15px;
-}
+  }
   
-.date .day {
+  .date .day {
   font-size: 45px;
   line-height: 45px;
   position: absolute;
   left: 5px;
   top: 0px;
-}  
-
-.year, .month, .day {
-  color: white;
-}
+  }  
 
 
 /* FlipCard CSS by Aron @CodePen */
 
 .flip {
   position: relative;
+  display: inline-block;
+  margin: 1em;
+  width: 230px;
 }
 
 .flip > .front,
@@ -75,6 +95,15 @@
   transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transition-duration: .5s;
   transition-property: transform, opacity;
+  color: white;
+  width: inherit;
+  background-size: cover !important;
+  background-position: center !important;
+  height: 220px;
+  padding: 1em 2em;
+  background: #313131;
+  border-radius: 10px;
+  text-align: center;
 }
 
 .flip > .front {
@@ -110,27 +139,6 @@
 
 .flip.flip-vertical:hover > .back {
   transform: rotateX(0deg);
-}
-
-.flip {
-  position: relative;
-  display: inline-block;
-  margin-right: 10px;
-  margin-bottom: 1em;
-  width: 240px;
-}
-
-.flip > .front,
-.flip > .back {
-  display: block;
-  color: white;
-  width: inherit;
-  background-size: cover !important;
-  background-position: center !important;
-  height: 240px;
-  padding: 1em 2em;
-  background: #313131;
-  border-radius: 10px;
 }
 
 .flip > .front p,

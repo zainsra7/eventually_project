@@ -137,7 +137,7 @@ i {
   }
   
   /* Date CSS by Pali Madra @CodePen*/
-  .example-date {
+  .date {
   background-color: #2196F3;
   float: right;
   position: relative;
@@ -145,7 +145,7 @@ i {
   margin-left: 2px;
   }
   
-  .example-date .year{
+  .date .year{
   display: block;
   position: absolute;
   right: -10px;
@@ -155,12 +155,12 @@ i {
     font-weight:bold;
   }
   
-  .example-date .month {
+  .date .month {
   text-transform: uppercase;
   font-size: 15px;
   }
   
-  .example-date .day {
+  .date .day {
   font-size: 45px;
   line-height: 45px;
   position: absolute;

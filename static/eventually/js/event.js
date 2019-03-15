@@ -1,8 +1,10 @@
-// Comment section
+// Comment section (Disqus)
 
 var disqus_config = function () {
-    this.page.url = "http://127.0.0.1:8000/eventually/event/";  // Replace PAGE_URL with your page's canonical URL variable
-    this.page.identifier = "hashCode"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    $(document).ready(function () {
+        this.page.url = "http://127.0.0.1:8000/eventually/event/";
+        this.page.identifier = $('#event-id').val();
+    });
 };
 
 (function () {
@@ -13,7 +15,7 @@ var disqus_config = function () {
 })();
 
 
-// Map
+// Map (Google)
 
 function initMap() {
     var geocoder = new google.maps.Geocoder;
@@ -25,26 +27,45 @@ function initMap() {
 };
 
 function geocodeAddress(geocoder, map) {
-    geocoder.geocode({
-        componentRestrictions: {
-            country: 'UK',
-            postalCode: 'G116DN'
-        }
-    }, function (results, status) {
-        if (status === 'OK') {
-            map.setCenter(results[0].geometry.location);
-            new google.maps.Marker({
-                map: map,
-                position: results[0].geometry.location
-            });
-        } else {
-            window.alert('Geocode was not successful for the following reason: ' +
-                status);
-        }
+    $(document).ready(function () {
+        geocoder.geocode({
+            componentRestrictions: {
+                country: 'UK',
+                postalCode: $('#location').html()
+            }
+        }, function (results, status) {
+            if (status === 'OK') {
+                map.setCenter(results[0].geometry.location);
+                new google.maps.Marker({
+                    map: map,
+                    position: results[0].geometry.location
+                });
+            }
+        });
     });
-}
+};
 
 
 $(document).ready(function () {
     $('.modal').modal();
+
+    // Get request for updated event attendance
+    $('#join-button').click(function () {
+        var eventid;
+        eventid = $(this).attr("data-eventid");
+
+        $.get('/eventually/join/', { event_id: eventid }, function (data) {
+            $('#attendee-count').html(data);
+            
+            // Toggle join/withdraw button
+            if ($('#join-button').text() == "Join event") {
+                $('#join-button').html('Withdraw'); 
+                $('#join-button').addClass('red');
+            }
+            else {
+                $('#join-button').html('Join event');
+                $('#join-button').removeClass('red');
+            }
+        });
+    });
 });

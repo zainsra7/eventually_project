@@ -1,6 +1,30 @@
-.dropdown-button {
+/* Search bar */
+
+.nav-wrapper {
+    flex: 2;
+}
+
+.btn {
     margin: auto 15px;
 }
+
+#filter-field, #sort-field {
+    max-width: 120px;
+    display:flex;
+    align-items: center;
+}
+
+#search-container {
+    display: flex;
+    align-items: center;
+}
+
+#search-container, #events-container, #pagination-container {
+    margin-top: 40px;
+}
+
+
+/* Events */
 
 .card-image {
     height: 180px;
@@ -11,6 +35,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    position: center center;
 }
 
 .card-content {
@@ -19,21 +44,23 @@
     justify-content: space-between;
 }
 
+
+/* Pagination */
+
 .pagination {
     text-align: center;
 }
 
-#search-container, #events-container, #pagination-container {
-    margin-top: 40px;
-}
 
-#search-container {
-    display: flex;
-    align-items: center;
+/* Fallback */
+
+#no-events {
+    text-align: center;
 }
 
 
 /* Date CSS by Pali Madra @CodePen*/
+
 .date {
     background-color: #2196F3;
     float: right;

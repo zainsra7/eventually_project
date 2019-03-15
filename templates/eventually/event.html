@@ -1,3 +1,5 @@
+<!-- Tags, Comment, Edit -->
+
 {% extends 'eventually/base.html' %}
 {% load staticfiles %}
 
@@ -10,64 +12,113 @@ Event
 {% endblock %}
 
 {% block jumbotron%}
-<div class="jumbotron-wrapper" style="background-image: url({% static 'images/background.jpg' %});">
+{% if event %}
+<div class="jumbotron-wrapper" style="background-image: url({{ event.image }});">
+  {% endif %}
   {% endblock %}
 
   {% block body_block %}
+  {% if event %}
 
   <!-- Event image, details, comments and map (Using CSS Flexbox)-->
   <main>
+
     <div class="heading w3-animate-zoom">
 
-      <!-- Event details -->
       <div class="row" id="details-facebook">
+
+        <!-- Event details -->
         <div id="event-details" class="col s8 card">
           <div class="date">
-            <span class="day">07</span>
-            <span class="month">Dec</span>
-            <span class="year">2019</span>
+            <span class="day">{{ event.date|date:"d" }}</span>
+            <span class="month">{{ event.date|date:"M" }}</span>
+            <span class="year">{{ event.date|date:"Y" }}</span>
           </div>
+
           <div id="event-info" class="card-content">
-
-            <div class="card-title">Event name</div>
-
-            <p><i class="material-icons">event_note</i> <b>Description:
-              </b>hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-            </p>
-            <p><i class="material-icons">access_time</i> <b>Time: </b></p>
-            <p><i class="material-icons">location_on</i> <b>Location: </b></p>
-            <p><i class="material-icons">group</i> <b>Attendees: </b></p>
+            <div class="card-title">{{ event.title }}</div>
+            <p><i class="material-icons">event_note</i> <b>Description: </b> {{ event.description }}</p>
+            <p><i class="material-icons">access_time</i> <b>Time: </b> {{ event.date.time }}</p>
+            <p><i class="material-icons">location_on</i> <b>Location: </b> {{ event.address }}, <span id="location">
+                {{ event.location }} </span></p>
+            <p><i class="material-icons">group</i> <b>Attendees: </b> <span
+                id="attendee-count">{{ event.attendees }}</span> / {{ event.capacity }}</p>
+            {% if tags %}
+            <p>
+              <i class="material-icons">code</i> <b>Tags: </b>
+                {% for tag in tags %}
+                <span class="chip brown lighten-3">
+                {{ tag }}
+                </span>
+                {% endfor %}
+              </p>
+            {% endif %}
 
             <div id="join-btn">
-              <button class="waves-effect waves-light-green btn w3-hover-black" href="#">Join event</button>
+              {% if closed %}
+              <button class="waves-effect waves-light-green blue btn w3-hover-black">Closed</button>
+              {% else %}
+              {% ifequal attendees event.capacity %}
+              {% if joined %}
+              <button id="join-button" data-eventid="{{ event.id }}"
+                class="waves-effect waves-light-green red btn w3-hover-black" type="button">Withdraw</button>
+              {% else %}
+              <button class="waves-effect waves-light-green red btn w3-hover-black">Event full</button>
+              {% endif %}
+              {% else %}
+              {% if user.is_authenticated %}
+              {% if joined %}
+              <button id="join-button" data-eventid="{{ event.id }}"
+                class="waves-effect waves-light-green red btn w3-hover-black" type="button">Withdraw</button>
+              {% else %}
+              <button id="join-button" data-eventid="{{ event.id }}"
+                class="waves-effect waves-light-green btn w3-hover-black" type="button">Join event</button>
+              {% endif %}
+              {% else %}
+              <button class="login-btn waves-effect waves-light-green btn w3-hover-black">Join event</button>
+              {% endif %}
+              {% endifequal %}
+              {% endif %}
             </div>
           </div>
         </div>
 
+        {% if event.fb_page %}
         <!-- Facebook plugin -->
         <div id="event-facebook" class="col s4 card">
           <div class="card-content">
             <iframe
-              src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fzainsrawrites&tabs=timeline%2Cevents&width=340&height=500&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=true&appId"
-              height="400" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true"
-              allow="encrypted-media"></iframe>
+              src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2F{{ event.fb_page }}&tabs=timeline%2Cevents&height=500&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=true&appId"
+              height="400" width="340" style="border:none;overflow:hidden" scrolling="no" frameborder="0"
+              allowTransparency="true" allow="encrypted-media"></iframe>
           </div>
         </div>
+
       </div>
+      {% endif %}
+
     </div>
 
+    <!-- Options -->
+    <div class="options-bar">
 
-    <!-- Contact host -->
-    <div class="contact-host-bar">
-      <!-- Modal Trigger -->
+      <!-- Contact host -->
       <a id="contact-host-btn" class="btn-floating pulse btn blue modal-trigger" data-target="contact-host"><i
           class="material-icons large">mail</i></a>
+
+      <!-- Edit event -->
+      {% ifequal event.host.user user %}
+      <a id="edit-event-btn" class="btn-floating pulse btn blue modal-trigger"><i
+          class="material-icons large">edit</i></a>
+      {% endifequal %}
+
     </div>
 
-    <!-- Modal Structure -->
+    <!-- Contact host modal -->
     <div id="contact-host" class="modal modal-fixed-footer">
+
       <div class="modal-content">
-        <h4>Contact host</h4>
+        <h4>Contact host ({{ event.host.user.username }})</h4>
         <div class="row">
           <form class="col s12">
             <div class="row">
@@ -81,19 +132,21 @@ Event
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect waves-red btn-flat">CANCEL</a>
-        <a href="#!" class="modal-close waves-effect waves-green btn-flat">SEND</a>
+        <a class="modal-close waves-effect waves-red btn-flat">CANCEL</a>
+        <a class="modal-close waves-effect waves-green btn-flat">SEND</a>
       </div>
 
     </div>
+
 </div>
 
 
 <div id="comment-map">
 
-  <!-- Comment section -->
+  <!-- Comment section (Disqus) -->
   <div id="comment-section" class="card">
     <div class="card-content">
+
       <div class="card-title">Comment Section</div>
 
       <div id="disqus_thread"></div>
@@ -103,11 +156,38 @@ Event
     </div>
   </div>
 
-  <!-- Map -->
+  <!-- Map (Google) -->
   <div class="card">
     <div class="card-content">
       <div id="map"></div>
     </div>
   </div>
+
 </div>
+
+{% else %}
+<!-- Fallback if no event exists -->>
+<div class="container w3-animate-zoom">
+
+  <div class="card white darken-1">
+    <div class="card-content">
+      <div class="row">
+        <p id="does-not-exist">The specified event does not exist.</p>
+      </div>
+    </div>
+
+    <!-- Button to redirect to search page -->
+    <div class="card-action blue">
+      <div class="input-field center">
+        <a class="waves-effect waves-light green btn w3-hover-black" href="{% url 'search' %}">Search for events<i
+            class="material-icons right">search</i></a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endif %}
+
+<!-- Get event ID for Disqus unique identifier -->
+<input type=hidden id="event-id" value="{{ event.id }}" />
 {% endblock %}
