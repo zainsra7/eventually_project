@@ -14,8 +14,6 @@ EMAIL_HOST = 'smtp.sendgrid.net'
 
 # Enter host user name here
 EMAIL_HOST_USER = ''
-
-# Enter host password here
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
