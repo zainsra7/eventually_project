@@ -17,5 +17,4 @@ urlpatterns = [
     url(r'^password_reset/$',views.password_reset, name='password_reset'),
     url(r'^event/(?P<event_id>[\w\-]+)/$',views.event, name='event'),
     url(r'^join/$',views.join_event, name='join_event'),
-    url(r'^forget_password/$', views.forgot_password, name="forgot_password")
 ]
