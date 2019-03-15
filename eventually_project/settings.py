@@ -10,8 +10,9 @@ MEDIA_DIR = os.path.join(BASE_DIR, 'media')
 SECRET_KEY = 'l8rw$%qdwtw=39+26ykdo^-ste1t9^1g9fiw$vcs+p2zwxhw8k'
 
 EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_HOST_USER = 'samuelagbede'
-EMAIL_HOST_PASSWORD = 'samuel1234'
+# Include user details for SendGrid here
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
