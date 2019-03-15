@@ -19,7 +19,6 @@ class Event(models.Model):
     image = models.URLField(blank=True)
     location = models.CharField(max_length=8, default="G128RZ")  # PostalCode
     address = models.CharField(max_length=2000)   # Complete Address
-    #date = models.DateField(default=now, blank=False)
     time = models.TimeField(default=now, blank=True)
     date = models.DateTimeField(blank=True)
     capacity = models.PositiveSmallIntegerField(default=1, validators=[MinValueValidator(1, "Number of Attendees must be a positive number!")])

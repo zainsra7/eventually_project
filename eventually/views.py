@@ -461,8 +461,7 @@ def user_login(request):
                 # If the account is valid and active, we can log the user in
                 # We'll send the user back to the homepage
                 login(request, user)
-                send_events_qr_code(username, user.email, "Fresh events!", event_date="16/12/2019",
-                                    event_venue="The Moon!")
+                # send_events_qr_code(username, user.email, "Fresh events!", event_date="16/12/2019", event_venue="The Moon!")
                 return HttpResponseRedirect(reverse('index'))
             else:
                 # An inactive account was used - no logging in!
