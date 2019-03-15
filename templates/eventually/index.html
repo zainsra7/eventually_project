@@ -29,23 +29,15 @@ Index
                 </p>
             </div>
         </div>
-        <div class="host-search-bar black">
-            <a id="host-btn" href="{% url 'host' %}" class="waves-effect waves-green waves-light btn"><i class="material-icons left">add_circle</i>Host</a>
-            <form id="search-form">
-                <div class="input-field inline">
-                    <input id="search-field" type="text" class="validate white-text">
-                    <label for="search-field">Search</label>
-                </div>
-            </div>
             <div class="host-search-bar black">
                 <a id="host-btn" href="{% url 'host' %}" class="waves-effect waves-green waves-light btn"><i
                         class="material-icons left">add_circle</i>Host</a>
-                <form id="search-form">
+                <form id="search-form" method="GET" action="{% url 'search' %}">
                     <div class="input-field inline">
-                        <input id="search-field" type="text" class="validate white-text">
-                        <label for="search-field">Search</label>
+                        <input id="search" type="text" name="search" class="validate white-text">
+                        <label for="search">Search</label>
                     </div>
-                    <a href="{% url 'search' %}" type="submit"
+                    <a id="search-btn" type="submit"
                         class="waves-effect waves-green btn-floating green white-text waves-circle"><i
                             class="material-icons">search</i></a>
                 </form>

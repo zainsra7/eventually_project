@@ -17,10 +17,11 @@ class Event(models.Model):
     title = models.CharField(max_length=200)
     description = models.CharField(max_length=5000)
     image = models.URLField(blank=True)
-    location = models.CharField(max_length=8, validators=[MinLengthValidator(6, "UK PostCode is 6-8 Characters")])  # PostalCode
+    location = models.CharField(max_length=8, default="G128RZ")  # PostalCode
     address = models.CharField(max_length=2000)   # Complete Address
-    date = models.DateField(default=now, blank=False)
+    #date = models.DateField(default=now, blank=False)
     time = models.TimeField(default=now, blank=True)
+    date = models.DateTimeField(blank=True)
     capacity = models.PositiveSmallIntegerField(default=1, validators=[MinValueValidator(1, "Number of Attendees must be a positive number!")])
     fb_page = models.CharField(blank=True, max_length=200) # Event FB_Page Name
     host = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
