@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var instances = M.Datepicker.init(date_picker, {
         'showClearBtn': true,
         'minDate': new Date(),
-        'format': "mm/dd/yy",
+        'format': "yy/mm/dd",
         'defaultDate': new Date(),
         'setDefaultDate': true,
         'yearRange': 3});

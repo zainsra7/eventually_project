@@ -1,0 +1,68 @@
+{% extends 'eventually/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+Edit an Event 
+{% endblock %}
+
+{% block body_block %}
+
+<div class=" container w3-animate-zoom">
+    <div class="card white darken-1">
+        <form id="event-form" method="POST" action="{% url 'edit_event' event.id %}" enctype="multipart/form-data">
+            <div class="center container">
+                <div id="event-card" class="card-panel grey lighten-5 z-depth-3 w3-topbar w3-bottombar w3-border-blue">
+                    <div class="row valign-wrapper w3-mobile">
+                        <div class="col s4 w3-border-aqua">
+                            <img alt="Event Picture" class="circle responsive-img" src={{event.image}} width="300px" />
+                        </div>
+                        <div class="col s8 w3-mobile">
+                            <i class="fas fa-user"></i>
+                            <div>
+                                <em>{{event.attendees}}</em>/<em>{{event.capacity}}</em>
+                            </div>
+                            <div class="divider"></div>
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <em>{{user.email}}</em>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% csrf_token %}
+            <div class="card-content">
+                <div class="ribbon">
+                    <a href="">Edit Event</a>
+                </div>
+                <label for="datepicker">Date</label>
+                <input id="datepicker" type="text" name ="date" val="{{event.date.date}}"class="datepicker" required/>
+                <label for="timepicker">Time</label>
+                <input id="timepicker" type="text" name="time" val="{{event.date.time}}" class="timepicker" required/>
+                    <div class="row">{{ event_form.as_p }}</div>
+                    <div class="row">
+                        <div class="file-field input-field">
+                            <div class="btn">
+                                <span>Image</span>
+                            </div>
+                            {{ event_image_form.as_p }}
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text">
+                            </div>
+                            <p class="errorlist">
+                            {{ image_error }}
+                            </p>
+                        </div>
+                    </div>
+            </div>
+            <div class="card-action blue">
+                <div class="input-field center">
+                    <button class="waves-effect waves-light green btn w3-hover-black" type="submit">Save Changes
+                        <i class="material-icons right">send</i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

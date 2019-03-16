@@ -37,7 +37,11 @@
                     <ul id="nav-mobile" class="right hide-on-med-and-down">
                         <li><a href="{% url 'index' %}" class="waves-effect waves-green btn-floating blue white-text waves-circle tooltipped" data-position="bottom" data-tooltip="Home"><i
                                     class="material-icons">home</i></a></li>
+                        <li><a href="{% url 'search' %}" class="waves-effect waves-green brown btn-floating blue white-text waves-circle tooltipped" data-position="bottom" data-tooltip="Search Event"><i
+                                    class="material-icons">search</i></a></li>
                         {% if user.is_authenticated %}
+                        <li><a href="{% url 'host' %}" class="waves-effect waves-green yellow btn-floating blue white-text waves-circle tooltipped" data-position="bottom" data-tooltip="Host Event"><i
+                            class="material-icons">add_circle</i></a></li>
                         <li><a href="{% url 'dashboard' %}" class="waves-effect waves-green green btn-floating blue white-text waves-circle tooltipped" data-position="bottom" data-tooltip="Dashboard"><i
                                     class="material-icons">dashboard</i></a></li>
                         <li><a href="{% url 'user_profile' %}" class="waves-effect waves-green grey btn-floating blue white-text waves-circle tooltipped" data-position="bottom" data-tooltip="Profile"><i
@@ -72,7 +76,15 @@
             <li>
                 <div class="divider"></div>
             </li>
+            <li><a href="{% url 'search' %}" class="waves-effect waves-green brown"><i class="material-icons">search</i> Search Event</a></li>
+            <li>
+                <div class="divider"></div>
+            </li>
             {% if user.is_authenticated %}
+            <li><a href="{% url 'host' %}" class="waves-effect waves-green yellow"><i class="material-icons">add_circle</i> Host Event</a></li>
+            <li>
+                <div class="divider"></div>
+            </li>
             <li><a href="{% url 'dashboard' %}" class="waves-effect waves-green green"><i class="material-icons">dashboard</i>
                     Dashboard</a></li>
             <li>

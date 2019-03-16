@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from eventually.forms import ProfileForm, EventForm, EventImageForm
+from eventually.forms import ProfileForm, EventForm, EventImageForm, EventEditForm
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -151,56 +151,115 @@ def search(request):
                                'sort_value': sort_value})
     return response
 
+# Creating the event
 
-@login_required
+@login_required(login_url='register')
 def host(request):
     # Successful create_event check
     event_created = False
 
     # To display error if the uploaded picture is not valid
     image_error = ""
+    time_error = ""
 
     if request.method == "POST":
         date = request.POST.get('date')
         time = request.POST.get('time')
-        if date and time:
-            print(date)
-            print(time)
-            event_date = datetime.strptime(date + " " + time, '%Y/%m/%d %H:%S')
-            print(event_date)
-            print(event_date.date())
-        event_form = EventForm(data=request.POST)
-        event_image_form = EventImageForm(data=request.POST)
-
-        if event_form.is_valid() and event_image_form.is_valid():
-            event = event_form.save(commit=False)  # Get Event Object
-
-            event_created = True
-
-            if 'image' in request.FILES:
-                image = request.FILES['image']
-                if '.jpg' in image.name or '.png' in image.name:
-                    response = cloudinary.uploader.upload(request.FILES['image'],
-                                                          folder="event_photo/",
-                                                          public_id=event.id)
-                    event.image = response['secure_url']
-                else:
-                    event_created = False
-                    image_error = "Invalid Image File Type! Only .jpg and .png files supported!"
-            if event_created:
-                event.date = event_date.date()
-                event.host = UserProfile.objects.get(user=request.user)
-                event.save()
+        date_time = datetime.strptime(date + " " + time, '%y/%m/%d %H:%M')
+        if (datetime.now().date() == date_time.date() and datetime.now().time() >= date_time.time()):
+            time_error = "Please select future time!"
+            event_form = EventForm()
+            event_image_form = EventImageForm()
         else:
-            print(event_form.errors, event_image_form.errors)
+            event_form = EventForm(data=request.POST)
+            event_image_form = EventImageForm(data=request.POST)
+
+            if event_form.is_valid() and event_image_form.is_valid():
+                event = event_form.save(commit=False)  # Get Event Object
+                event_created = True
+                if 'image' in request.FILES:
+                    image = request.FILES['image']
+                    if '.jpg' in image.name or '.png' in image.name:
+                        response = cloudinary.uploader.upload(request.FILES['image'],
+                                                            folder="event_photo/",
+                                                            public_id=event.id)
+                        event.image = response['secure_url']
+                    else:
+                        event_created = False
+                        image_error = "Invalid Image File Type! Only .jpg and .png files supported!"
+                if event_created:
+                    # Parsing and inserting event_date
+                    if date and time:
+                        event.date = datetime.strptime(date + " " + time, '%y/%m/%d %H:%M')
+                    event.host = UserProfile.objects.get(user=request.user)
+                    event.save()
+                    return HttpResponseRedirect(reverse('event',kwargs={'event_id': event.id}))
+            else:
+                print(event_form.errors, event_image_form.errors)
     else:
         # Return a blank form
         event_form = EventForm()
         event_image_form = EventImageForm()
     return render(request, 'eventually/host.html',
                   {"event_form": event_form, "event_image_form": event_image_form, "image_error": image_error,
-                   "event_created": event_created})
+                   "event_created": event_created, 'time_error': time_error})
 
+# Editing an event
+@login_required
+def edit_event(request, event_id):
+    image_error = ""
+    time_error = ""
+    # Successful update_event check
+    event_updated = False
+    try:
+        event = Event.objects.get(id=event_id)
+        host_profile = UserProfile.objects.get(id=event.host.id)
+        if host_profile.user == request.user: # Allow editing only if the user requesting to edit event is host
+            if request.method == "POST":
+                date = request.POST.get('date')
+                time = request.POST.get('time')
+                date_time = datetime.strptime(date + " " + time, '%y/%m/%d %H:%M')
+                if (datetime.now().date() == date_time.date() and datetime.now().time() >= date_time.time()):
+                    time_error = "Please select future time!"
+                else:
+                    event_form = EventEditForm(data=request.POST)
+                    event_image_form = EventImageForm(data=request.POST)
+
+                    if event_form.is_valid() and event_image_form.is_valid():
+                        event_new = event_form.save(commit=False)  # Get Event Object
+                        event_updated = True
+                        if 'image' in request.FILES:
+                            image = request.FILES['image']
+                            if '.jpg' in image.name or '.png' in image.name:
+                                response = cloudinary.uploader.upload(request.FILES['image'],
+                                                                    folder="event_photo/",
+                                                                    public_id=event.id)
+                                event.image = response['secure_url']
+                            else:
+                                event_updated = False
+                                image_error = "Invalid Image File Type! Only .jpg and .png files supported!"
+                        if event_updated:
+                            event.date = date_time
+                            event.description = event_new.description
+                            event.fb_page = event_new.fb_page
+                            event.address = event_new.address
+                            event.title = event_new.title
+                            event.location = event_new.location
+                            event.save(update_fields=['title', 'description', 'fb_page', 'location', 'address', 'date'])
+                            return HttpResponseRedirect(reverse('event',kwargs={'event_id': event.id}))
+                    else:
+                        print(event_form.errors, event_image_form.errors)
+            else:
+                event_form = EventEditForm(instance=event)
+                event_image_form = EventImageForm()
+        else:
+            return HttpResponseRedirect(reverse('index'))
+    except:
+        return HttpResponseRedirect(reverse('index'))
+    
+    return render(request, 'eventually/edit_event.html',
+                  {"event_form": event_form, "event_image_form": event_image_form, "image_error": image_error,
+                   "event_updated": event_updated, 'time_error': time_error, 'event': event})
 
 def event(request, event_id):
     context_dict = {}
@@ -229,7 +288,7 @@ def event(request, event_id):
     return render(request, 'eventually/event.html', context_dict)
 
 
-@login_required
+@login_required(login_url='register')
 def join_event(request):
     event_id = None
 
@@ -309,7 +368,6 @@ def user_profile(request):
             except (User.DoesNotExist, UserProfile.DoesNotExist) as e:
                 return HttpResponseRedirect(reverse('index'))
         else:
-            # Print problems to the terminal in case of invalid forms
             print(user_form.errors, profile_form.errors)
     else:
         # Render blank form if not HTTP POST
@@ -328,6 +386,9 @@ def user_profile(request):
 # there are no errors after submission, update user's database and send a mail to user's mail with verification code.
 # Redirect to view for email validation
 def register(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('index'))
+
     # Successful registration check
     registered = False
 
@@ -335,9 +396,10 @@ def register(request):
     image_error = ""
 
     if request.method == 'POST':
-        print('Post is called')
+        username = request.POST.get('username').lower()
         password = request.POST.get('password')
         email_address = request.POST.get('email')
+        next = request.POST.get('next', '/')
 
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileForm(data=request.POST)
@@ -346,10 +408,8 @@ def register(request):
 
         # Check if forms are valid
         if user_form.is_valid() and profile_form.is_valid():
-            print('Form is valid')
             # Check if email address is not taken
             try:
-                print('Try to get users')
                 user = User.objects.get(email=email_address)
 
                 if user:
@@ -359,17 +419,16 @@ def register(request):
                                                                         'image_error': image_error,
                                                                         'email_error': 'Email address is already taken'})
             except MultipleObjectsReturned:
-                print('Multiple objects returned')
                 return render(request, 'eventually/register.html', {'user_form': user_form,
                                                                     'profile_form': profile_form,
                                                                     'registered': registered,
                                                                     'image_error': image_error,
                                                                     'email_error': 'Email address is already taken'})
             except ObjectDoesNotExist:
-                print('Object does not exist')
                 # Save user's form data to database
                 user = user_form.save(commit=False)
                 user.set_password(password)
+                user.username = username
 
                 # Save user profile form date to database
                 user_profile = profile_form.save(commit=False)
@@ -390,22 +449,20 @@ def register(request):
                         image_error = "Invalid Image File Type!"
                 # In Case there is no uploaded image, use default ranog one
                 else:
-                    user_profile.profile_pic = static('images/rango.jpg')
+                    user_profile.profile_pic = static('images/pickachu.png')
 
                 if save_profile:
                     # Generate verification code and send to the user's email address
                     user_profile.ver_code = generate_random_code()
                     send_mail_api(user_profile.user.username, user_profile.user.email, user_profile.ver_code)
-
-                    # user.set_password(user.password)
                     user.save()
                     request.session['profile_id'] = user.id
                     request.session['email'] = user.email
                     user_profile.user = user
                     user_profile.save()
+                    return render(request, 'eventually/account_confirmation.html', {'next': next})
 
-                    print('Account confirmation')
-                    return HttpResponseRedirect(reverse('account_confirmation'))
+                    # return HttpResponseRedirect(reverse('account_confirmation'))
         else:
             # Print problems to the terminal in case of invalid forms
             print(user_form.errors, profile_form.errors)
@@ -413,12 +470,15 @@ def register(request):
         # Render blank form if not HTTP POST
         user_form = UserForm()
         profile_form = UserProfileForm()
+        next = request.GET.get('next', '/') # Storing previous link/page in to redirect user to that page instead of index
+        
 
     # Render template depending on the context.
     return render(request, 'eventually/register.html', {'user_form': user_form,
                                                         'profile_form': profile_form,
                                                         'registered': registered,
-                                                        'image_error': image_error})
+                                                        'image_error': image_error,
+                                                        'next' : next})
 
 
 @login_required
@@ -433,7 +493,7 @@ def user_login(request):
     # If the request is a HTTP POST, try to pull out the relevant information
     if request.method == 'POST':
         # Gather the username and password provided by the user.
-        username = request.POST.get('username')
+        username = request.POST.get('username').lower()
         password = request.POST.get('password')
 
         # Get the User object
@@ -473,7 +533,6 @@ def user_login(request):
 
 
 def send_mail_api(username, email, ver_code):
-    print(username, email, ver_code)
     subject, from_email, to = 'Verification Code', 'events@eventually.com', email
     text_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
     html_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
@@ -514,10 +573,11 @@ def send_mail_forgot_password(email, ver_code):
 def generate_random_code():
     return random.randint(100000, 999999)
 
-
+# Function to confirm a user account through a verification code sent via email
 def account_confirmation(request):
     if request.method == 'POST':
         ver_code = request.POST.get('ver_code')
+        next = request.POST.get('next', '/')
 
         id = request.session['profile_id']
         password = request.session['password']
@@ -527,11 +587,9 @@ def account_confirmation(request):
             profile = UserProfile.objects.get(user=user)
 
             if ver_code == profile.ver_code:
-                print(user.username, user.password)
                 user.active = True
                 user.save()
                 logged_in_user = authenticate(request, username=user.username, password=password)
-                print(logged_in_user)
 
                 if logged_in_user:
                     if logged_in_user.is_active:
@@ -539,7 +597,7 @@ def account_confirmation(request):
 
                         profile.approved = True
                         profile.save()
-                        return HttpResponseRedirect(reverse('index'))
+                        return HttpResponseRedirect(next)
             else:
                 return render(request, 'eventually/account_confirmation.html',
                               {'error': 'Please enter a valid code. Wrong code inputted.'})
@@ -628,11 +686,9 @@ def send_event_owner_mail(request):
         data = {
             'is_sent': True
         }
-        print("Sent")
         return JsonResponse(data)
     except:
         data = {
             'is_sent': False
         }
-        print("Unsent")
         return JsonResponse(data)
