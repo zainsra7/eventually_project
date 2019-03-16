@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from eventually.models import UserProfile, Event
 import datetime
 import re
-
+from captcha.fields import ReCaptchaField
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
@@ -12,6 +12,9 @@ class UserForm(forms.ModelForm):
         model = User
         fields = ('first_name','last_name','username', 'email', 'password')
 
+
+class Captcha(forms.ModelForm):
+    captcha = ReCaptchaField()
 
 class UserProfileForm(forms.ModelForm):
     profile_pic = forms.ImageField(required=False, label="", widget=forms.FileInput(attrs={"accept": "image/*"}))
