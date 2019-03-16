@@ -256,7 +256,7 @@ def edit_event(request, event_id):
             return HttpResponseRedirect(reverse('index'))
     except:
         return HttpResponseRedirect(reverse('index'))
-    
+
     return render(request, 'eventually/edit_event.html',
                   {"event_form": event_form, "event_image_form": event_image_form, "image_error": image_error,
                    "event_updated": event_updated, 'time_error': time_error, 'event': event})
@@ -306,6 +306,8 @@ def join_event(request):
             if user_profile:
                 # Add/Delete user as attendee of event in Attendee model
                 try:
+                    send_events_qr_code(user_profile.user.username, user_profile.user.email, event.title, event.date,
+                                        event.address)
                     attendee = Attendee(event=event, user=user_profile)
                     attendee.save()
                 except:
@@ -316,6 +318,7 @@ def join_event(request):
                 event.save()
 
     return HttpResponse(event.attendees)
+
 
 # Function to let users edit their profile
 @login_required
@@ -399,17 +402,25 @@ def register(request):
         username = request.POST.get('username').lower()
         password = request.POST.get('password')
         email_address = request.POST.get('email')
-        next = request.POST.get('next', '/')
 
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileForm(data=request.POST)
 
         request.session['password'] = password
 
+        if not email_address.endswith('gla.ac.uk'):
+            print("Inside", email_address.endswith('gla.ac.uk '))
+            return render(request, 'eventually/register.html', {'user_form': user_form,
+                                                                'profile_form': profile_form,
+                                                                'registered': registered,
+                                                                'image_error': image_error,
+                                                                'email_error': 'Email address must be a Glasgow University mail'})
         # Check if forms are valid
-        if user_form.is_valid() and profile_form.is_valid():
+        elif user_form.is_valid() and profile_form.is_valid():
+
             # Check if email address is not taken
             try:
+
                 user = User.objects.get(email=email_address)
 
                 if user:
@@ -419,12 +430,14 @@ def register(request):
                                                                         'image_error': image_error,
                                                                         'email_error': 'Email address is already taken'})
             except MultipleObjectsReturned:
+                print('Multiple objects returned')
                 return render(request, 'eventually/register.html', {'user_form': user_form,
                                                                     'profile_form': profile_form,
                                                                     'registered': registered,
                                                                     'image_error': image_error,
                                                                     'email_error': 'Email address is already taken'})
             except ObjectDoesNotExist:
+                print('Object does not exist')
                 # Save user's form data to database
                 user = user_form.save(commit=False)
                 user.set_password(password)
@@ -455,14 +468,16 @@ def register(request):
                     # Generate verification code and send to the user's email address
                     user_profile.ver_code = generate_random_code()
                     send_mail_api(user_profile.user.username, user_profile.user.email, user_profile.ver_code)
+
+                    # user.set_password(user.password)
                     user.save()
                     request.session['profile_id'] = user.id
                     request.session['email'] = user.email
                     user_profile.user = user
                     user_profile.save()
-                    return render(request, 'eventually/account_confirmation.html', {'next': next})
 
-                    # return HttpResponseRedirect(reverse('account_confirmation'))
+                    print('Account confirmation')
+                    return HttpResponseRedirect(reverse('account_confirmation'))
         else:
             # Print problems to the terminal in case of invalid forms
             print(user_form.errors, profile_form.errors)
@@ -470,15 +485,12 @@ def register(request):
         # Render blank form if not HTTP POST
         user_form = UserForm()
         profile_form = UserProfileForm()
-        next = request.GET.get('next', '/') # Storing previous link/page in to redirect user to that page instead of index
-        
 
     # Render template depending on the context.
     return render(request, 'eventually/register.html', {'user_form': user_form,
                                                         'profile_form': profile_form,
                                                         'registered': registered,
-                                                        'image_error': image_error,
-                                                        'next' : next})
+                                                        'image_error': image_error})
 
 
 @login_required
@@ -504,7 +516,8 @@ def user_login(request):
             try:
                 profile = UserProfile.objects.get(user=user)
             except ObjectDoesNotExist:
-                return render(request, 'eventually/index.html', {'error': 'No user matches the details inputted', "events": popular_events()})
+                return render(request, 'eventually/index.html',
+                              {'error': 'No user matches the details inputted', "events": popular_events()})
 
             if profile.approved is False:
                 # save user profile id to session
@@ -522,7 +535,8 @@ def user_login(request):
         else:
             # Bad login details were provided, So we can't log the user in
             print("Invalid login details: {0}, {1}".format(username, password))
-            return render(request, 'eventually/index.html', {'error': 'No user matches the details inputted', "events": popular_events()})
+            return render(request, 'eventually/index.html',
+                          {'error': 'No user matches the details inputted', "events": popular_events()})
 
     # The request is not HTTP POST, so display the login form
     # This scenario would most likely be a HTTP GET
@@ -542,7 +556,10 @@ def send_mail_api(username, email, ver_code):
 
 
 def send_events_qr_code(username, email, event_name, event_date, event_venue):
-    image = qrcode.make("Name : Sam. Event : Event 2")
+    picture_title = "%s_tickets_%s.png" % (event_name, username)
+    print(picture_title)
+
+    image = qrcode.make(picture_title)
     imageByteArray = io.BytesIO()
     image.save(imageByteArray, format='PNG')
     image_modified = imageByteArray.getvalue()
@@ -561,7 +578,7 @@ def send_events_qr_code(username, email, event_name, event_date, event_venue):
     message = EmailMultiAlternatives(subject, text_content, from_email, [to])
     message.attach_alternative(html_content, "text/html")
 
-    message.attach('sam.png', image_modified, 'image/png')
+    message.attach(picture_title, image_modified, 'image/png')
     message.send()
 
 
@@ -577,7 +594,6 @@ def generate_random_code():
 def account_confirmation(request):
     if request.method == 'POST':
         ver_code = request.POST.get('ver_code')
-        next = request.POST.get('next', '/')
 
         id = request.session['profile_id']
         password = request.session['password']
@@ -587,9 +603,11 @@ def account_confirmation(request):
             profile = UserProfile.objects.get(user=user)
 
             if ver_code == profile.ver_code:
+                print(user.username, user.password)
                 user.active = True
                 user.save()
                 logged_in_user = authenticate(request, username=user.username, password=password)
+                print(logged_in_user)
 
                 if logged_in_user:
                     if logged_in_user.is_active:
@@ -597,7 +615,7 @@ def account_confirmation(request):
 
                         profile.approved = True
                         profile.save()
-                        return HttpResponseRedirect(next)
+                        return HttpResponseRedirect(reverse('index'))
             else:
                 return render(request, 'eventually/account_confirmation.html',
                               {'error': 'Please enter a valid code. Wrong code inputted.'})
