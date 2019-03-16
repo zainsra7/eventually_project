@@ -5,24 +5,30 @@
 Host an Event 
 {% endblock %}
 
-{% block css_block %}
-  <!-- XDSoft DateTimePicker -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
-{% endblock %}
-
 {% block body_block %}
 
 <div class=" container w3-animate-zoom">
     <div class="card white darken-1">
         <form id="event-form" method="POST" action="{% url 'host' %}" enctype="multipart/form-data">
+            {% if event_created %}
+            <div class="w3-panel green w3-display-container">
+                <span onclick="this.parentElement.style.display='none'" class="w3-button w3-display-topright">X</span>
+                <p>Event Created Successfully!</p>
+                <p></p>
+            </div>
+            {% endif %}
             {% csrf_token %}
             <div class="card-content">
-                <span class="card-title center">Host an Event!</span>
-                <input id="datepicker" type="text" name ="date" class="datepicker" required/>
+                <div class="ribbon">
+                    <a href="">Host Event</a>
+                </div>
                 <label for="datepicker">Date</label>
-                <input id="timepicker" type="text" name="time" class="timepicker" required/>
+                <input id="datepicker" type="text" name ="date" class="datepicker" required/>
                 <label for="timepicker">Time</label>
+                <input id="timepicker" type="text" name="time" class="timepicker" required/>
+                <p class="errorlist">
+                    {{ time_error }}
+                </p>
                     <div class="row">{{ event_form.as_p }}</div>
                     <div class="row">
                         <div class="file-field input-field">
