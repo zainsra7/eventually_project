@@ -432,13 +432,13 @@ def populate():
     # Create Attendees
     for attendee in attendees:
         event = Event.objects.get_or_create(title=attendee["event"])[0]
-        u = User.objects.get(username=attendee["user"])
+        u = User.objects.get(username=attendee["user"].lower())
         user = UserProfile.objects.get_or_create(user=u)[0]
         add_attendee(event, user)
 
 
 def add_event(event):
-    u = User.objects.get(username=event["host"])
+    u = User.objects.get(username=event["host"].lower())
     up = UserProfile.objects.get_or_create(user=u)[0]
     event_date = datetime.strptime(event['date'] + " " + event['time'], '%Y/%m/%d %H:%M')
     e = Event.objects.get_or_create(title=event["title"], host=up, date=event_date, time=event['time'], location=event['post_code'], description=event['description'],image=event['image'], capacity=event['capacity'], address=event['address'], fb_page=event['fb_page'], attendees=event['attendees'])[0]
@@ -447,7 +447,7 @@ def add_event(event):
 
 
 def add_user_profile(user):
-    u = User.objects.create_user(username=user["username"], email=user["email"], password=user["password"], first_name=user["first_name"], last_name=user["last_name"])
+    u = User.objects.create_user(username=user["username"].lower(), email=user["email"], password=user["password"], first_name=user["first_name"], last_name=user["last_name"])
     u.save()
     user_profile = UserProfile.objects.get_or_create(user=u, profile_pic=user["profile_pic"], approved=True)[0]
     user_profile.save()

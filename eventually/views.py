@@ -692,3 +692,4 @@ def send_event_owner_mail(request):
             'is_sent': False
         }
         return JsonResponse(data)
+
