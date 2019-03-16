@@ -54,11 +54,16 @@ $(document).ready(function () {
         var eventid;
         eventid = $(this).attr("data-eventid");
 
+
+
         $.get('/eventually/join/', { event_id: eventid }, function (data) {
             $('#attendee-count').html(data);
             
             // Toggle join/withdraw button
             if ($('#join-button').text() == "Join event") {
+
+
+
                 $('#join-button').html('Withdraw'); 
                 $('#join-button').addClass('red');
             }

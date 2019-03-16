@@ -13,7 +13,7 @@ Register
             {% csrf_token %}
             <div class="card-content">
                 {% if email_error  %}
-                        <strong style = "color:red;">A user with this email address already exists. Please use a different one</strong>
+                        <strong style = "color:red;">{{ email_error }}</strong>
                 {% endif %}
                 <span class="card-title center">Register - Eventually</span>
                 {% csrf_token %}
