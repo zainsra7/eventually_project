@@ -697,8 +697,7 @@ def send_event_owner_mail(request):
     title = '[Eventually] New message from %s %s' % (from_first_name, from_last_name)
     message = "You have a new message. Here are the contents : \n\n %s" % message
     try:
-        send_mail_forgot_password('sammyplexus@gmail.com', 123123)
-        send_mail(title, message, 'messages@eventually.com', ['samuelagbede@outlook.com'], fail_silently=False)
+        send_mail(title, message, 'messages@eventually.com', [to_email], fail_silently=False)
         data = {
             'is_sent': True
         }
