@@ -56,7 +56,7 @@ $(document).ready(function () {
 
 
 
-        $.get('/eventually/join/', { event_id: eventid }, function (data) {
+        $.get('/eventually/join/', { event_id: eventid, join_button : $('#join-button').text() }, function (data) {
             $('#attendee-count').html(data);
             
             // Toggle join/withdraw button
@@ -77,11 +77,12 @@ $(document).ready(function () {
     $('#send-host-mail').click(function(){
 
 
+
         var message = $('#message').val();
         var to_email = $('#message').data('email-address');
         var from_email = $('#message').data('from');
-        var from_first_name = $('#message').data('from-firstname');
-        var from_last_name = $('#message').data('from-lastname');
+        var event_title = $('#message').data('event_title');
+        var username = $('#message').data('username');
 
 
         $.ajax({
@@ -90,8 +91,8 @@ $(document).ready(function () {
           'message': message,
           'to_email': to_email,
           'from_email': from_email,
-          'from_first_name': from_first_name,
-          'from_last_name': from_last_name
+          'username' : username,
+          'event_title' : event_title,
         },
         dataType: 'json',
         success: function (data) {

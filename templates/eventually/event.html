@@ -123,7 +123,7 @@ Event
           <form class="col s12">
             <div class="row">
               <div class="input-field col s12">
-                <textarea id="message" class="materialize-textarea" data-email-address = {{ event.host.user.email }} data-from = {{request.user.email }} data-from-firstname = {{request.user.first_name}} data-from-lastname = {{request.user_last_name}}></textarea>
+                <textarea id="message" class="materialize-textarea" data-email-address = {{ event.host.user.email }} data-from = {{request.user.email }} data-event_title = {{event.title}} data-username = {{request.user}}></textarea>
                 <label for="message"  >Message</label>
               </div>
             </div>

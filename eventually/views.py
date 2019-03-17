@@ -30,6 +30,7 @@ cloudinary.config(
     api_secret='B9r_lNfKaNy2Z8bK3d9wDksxhOs'
 )
 
+
 # Returns top five popular events based on number of attendees
 def popular_events():
     # Fetch all events from database
@@ -39,6 +40,7 @@ def popular_events():
     events = events.order_by('-attendees')[:5]
 
     return events
+
 
 def index(request):
     profile_pic = "/static/images/pickachu.png"
@@ -151,6 +153,7 @@ def search(request):
                                'sort_value': sort_value})
     return response
 
+
 # Creating the event
 
 @login_required(login_url='register')
@@ -181,8 +184,8 @@ def host(request):
                     image = request.FILES['image']
                     if '.jpg' in image.name or '.png' in image.name:
                         response = cloudinary.uploader.upload(request.FILES['image'],
-                                                            folder="event_photo/",
-                                                            public_id=event.id)
+                                                              folder="event_photo/",
+                                                              public_id=event.id)
                         event.image = response['secure_url']
                     else:
                         event_created = False
@@ -193,9 +196,7 @@ def host(request):
                         event.date = datetime.strptime(date + " " + time, '%y/%m/%d %H:%M')
                     event.host = UserProfile.objects.get(user=request.user)
                     event.save()
-                    return HttpResponseRedirect(reverse('event',kwargs={'event_id': event.id}))
-            else:
-                print(event_form.errors, event_image_form.errors)
+                    return HttpResponseRedirect(reverse('event', kwargs={'event_id': event.id}))
     else:
         # Return a blank form
         event_form = EventForm()
@@ -203,6 +204,7 @@ def host(request):
     return render(request, 'eventually/host.html',
                   {"event_form": event_form, "event_image_form": event_image_form, "image_error": image_error,
                    "event_created": event_created, 'time_error': time_error})
+
 
 # Editing an event
 @login_required
@@ -214,7 +216,7 @@ def edit_event(request, event_id):
     try:
         event = Event.objects.get(id=event_id)
         host_profile = UserProfile.objects.get(id=event.host.id)
-        if host_profile.user == request.user: # Allow editing only if the user requesting to edit event is host
+        if host_profile.user == request.user:  # Allow editing only if the user requesting to edit event is host
             if request.method == "POST":
                 date = request.POST.get('date')
                 time = request.POST.get('time')
@@ -232,8 +234,8 @@ def edit_event(request, event_id):
                             image = request.FILES['image']
                             if '.jpg' in image.name or '.png' in image.name:
                                 response = cloudinary.uploader.upload(request.FILES['image'],
-                                                                    folder="event_photo/",
-                                                                    public_id=event.id)
+                                                                      folder="event_photo/",
+                                                                      public_id=event.id)
                                 event.image = response['secure_url']
                             else:
                                 event_updated = False
@@ -246,9 +248,8 @@ def edit_event(request, event_id):
                             event.title = event_new.title
                             event.location = event_new.location
                             event.save(update_fields=['title', 'description', 'fb_page', 'location', 'address', 'date'])
-                            return HttpResponseRedirect(reverse('event',kwargs={'event_id': event.id}))
-                    else:
-                        print(event_form.errors, event_image_form.errors)
+                            return HttpResponseRedirect(reverse('event', kwargs={'event_id': event.id}))
+
             else:
                 event_form = EventEditForm(instance=event)
                 event_image_form = EventImageForm()
@@ -260,6 +261,7 @@ def edit_event(request, event_id):
     return render(request, 'eventually/edit_event.html',
                   {"event_form": event_form, "event_image_form": event_image_form, "image_error": image_error,
                    "event_updated": event_updated, 'time_error': time_error, 'event': event})
+
 
 def event(request, event_id):
     context_dict = {}
@@ -306,8 +308,14 @@ def join_event(request):
             if user_profile:
                 # Add/Delete user as attendee of event in Attendee model
                 try:
-                    send_events_qr_code(user_profile.user.username, user_profile.user.email, event.title, event.date,
-                                        event.address)
+                    if request.GET['join_button'] == "Join event":
+                        send_events_qr_code(user_profile.user.username, user_profile.user.email, event.title,
+                                            event.date,
+                                            event.address)
+                    else:
+                        send_events_qr_code_unregister(user_profile.user.username, user_profile.user.email, event.title,
+                                                       event.date,
+                                                       event.address)
                     attendee = Attendee(event=event, user=user_profile)
                     attendee.save()
                 except:
@@ -370,8 +378,7 @@ def user_profile(request):
                                                 'profile_pic'])  # Only update "user" and "profile_pic" fields of UserProfile instance
             except (User.DoesNotExist, UserProfile.DoesNotExist) as e:
                 return HttpResponseRedirect(reverse('index'))
-        else:
-            print(user_form.errors, profile_form.errors)
+
     else:
         # Render blank form if not HTTP POST
         user_form = ProfileForm()
@@ -409,7 +416,6 @@ def register(request):
         request.session['password'] = password
 
         if not email_address.endswith('gla.ac.uk'):
-            print("Inside", email_address.endswith('gla.ac.uk '))
             return render(request, 'eventually/register.html', {'user_form': user_form,
                                                                 'profile_form': profile_form,
                                                                 'registered': registered,
@@ -430,14 +436,12 @@ def register(request):
                                                                         'image_error': image_error,
                                                                         'email_error': 'Email address is already taken'})
             except MultipleObjectsReturned:
-                print('Multiple objects returned')
                 return render(request, 'eventually/register.html', {'user_form': user_form,
                                                                     'profile_form': profile_form,
                                                                     'registered': registered,
                                                                     'image_error': image_error,
                                                                     'email_error': 'Email address is already taken'})
             except ObjectDoesNotExist:
-                print('Object does not exist')
                 # Save user's form data to database
                 user = user_form.save(commit=False)
                 user.set_password(password)
@@ -476,11 +480,8 @@ def register(request):
                     user_profile.user = user
                     user_profile.save()
 
-                    print('Account confirmation')
                     return HttpResponseRedirect(reverse('account_confirmation'))
-        else:
-            # Print problems to the terminal in case of invalid forms
-            print(user_form.errors, profile_form.errors)
+
     else:
         # Render blank form if not HTTP POST
         user_form = UserForm()
@@ -517,7 +518,8 @@ def user_login(request):
                 profile = UserProfile.objects.get(user=user)
             except ObjectDoesNotExist:
                 return render(request, 'eventually/index.html',
-                              {'error': 'Invalid Username/Password combination. Please try again!', "events": popular_events()})
+                              {'error': 'Invalid Username/Password combination. Please try again!',
+                               "events": popular_events()})
 
             if profile.approved is False:
                 # save user profile id to session
@@ -534,9 +536,9 @@ def user_login(request):
                 return HttpResponse("Your Eventually account is disabled.")
         else:
             # Bad login details were provided, So we can't log the user in
-            print("Invalid login details: {0}, {1}".format(username, password))
             return render(request, 'eventually/index.html',
-                          {'error': 'Invalid Username/Password combination. Please try again!', "events": popular_events()})
+                          {'error': 'Invalid Username/Password combination. Please try again!',
+                           "events": popular_events()})
 
     # The request is not HTTP POST, so display the login form
     # This scenario would most likely be a HTTP GET
@@ -549,7 +551,8 @@ def user_login(request):
 def send_mail_api(username, email, ver_code):
     subject, from_email, to = 'Verification Code', 'events@eventually.com', email
     text_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
-    html_content = "Dear %s, \nPlease enter your verification code: %s" % (username, ver_code)
+    html_content = "Dear %s, \nPlease enter your verification code: %s <br><br>Warm Regards, <br>Evelyn from Eventually." % (
+    username, ver_code)
     message = EmailMultiAlternatives(subject, text_content, from_email, [to])
     message.attach_alternative(html_content, "text/html")
     message.send()
@@ -572,7 +575,8 @@ def send_events_qr_code(username, email, event_name, event_date, event_venue):
                    '<strong>Event details</strong> <br>' \
                    'Event Name : %s <br>' \
                    'Event Date : %s <br>' \
-                   'Event Venue : %s <br>' % (username, event_name, event_name, event_date, event_venue)
+                   'Event Venue : %s <br> <br>Warm Regards, <br>Evelyn from Eventually.' % (
+                   username, event_name, event_name, event_date, event_venue)
     message = EmailMultiAlternatives(subject, text_content, from_email, [to])
     message.attach_alternative(html_content, "text/html")
 
@@ -580,13 +584,27 @@ def send_events_qr_code(username, email, event_name, event_date, event_venue):
     message.send()
 
 
+def send_events_qr_code_deregister(username, email, event_name, event_date, event_venue):
+    subject, from_email, to = 'Confirmation of withdrawal from event : %s ' % event_name, 'events@eventually.com', email
+    text_content = "Dear %s, We are sorry to see you withdraw. " % username
+    html_content = '<p>Dear %s, <br>We see that you withdrew from event : %s. We are sorry to see you go. ' \
+                   '<br>' \
+                   'Should you want to re-register. Please ensure to do so before the tickets are sold out.' \
+                   '<br><br>Warm Regards,<br>Evelyn from Eventually.' % (username, event_name)
+    message = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    message.attach_alternative(html_content, "text/html")
+    message.send()
+
+
 def send_mail_forgot_password(email, ver_code):
-    send_mail("Reset your password", "Please enter this code to reset to your password : %s" % ver_code,
+    send_mail("Reset your password",
+              "Please enter this code to reset your password : %s <br><br>Warm Regards,<br>Seth from the Eventually security team." % ver_code,
               "events@eventually.com", [email], fail_silently=True)
 
 
 def generate_random_code():
     return random.randint(100000, 999999)
+
 
 # Function to confirm a user account through a verification code sent via email
 def account_confirmation(request):
@@ -601,11 +619,9 @@ def account_confirmation(request):
             profile = UserProfile.objects.get(user=user)
 
             if ver_code == profile.ver_code:
-                print(user.username, user.password)
                 user.active = True
                 user.save()
                 logged_in_user = authenticate(request, username=user.username, password=password)
-                print(logged_in_user)
 
                 if logged_in_user:
                     if logged_in_user.is_active:
@@ -691,13 +707,26 @@ def send_event_owner_mail(request):
     message = request.GET.get('message', None)
     to_email = request.GET.get('to_email', None)
     from_email = request.GET.get('from_email', None)
-    from_first_name = request.GET.get('first_name', None)
-    from_last_name = request.GET.get('last_name', None)
 
-    title = '[Eventually] New message from %s %s' % (from_first_name, from_last_name)
-    message = "You have a new message. Here are the contents : \n\n %s" % message
+    event_title = request.GET.get('event_title', None)
+    from_username = request.GET.get('username', None)
+
+    user = User.objects.get(email=to_email)
+
+    title = '[Eventually] New message from user %s with email address : %s' % (from_username, from_email)
+    text_content = "Dear %s, \nYou have a new message from %s on the eventually platform regarding the event you created titled : %s. " \
+                   "\nMeanwhile, here are the contents : \n%s \n\nYou can respond directly to the user by sending a mail to %s.  \n\n>Warm Regards, \nMatt from the Eventually messaging team." \
+                   % (user, from_username, event_title,  message, from_email)
+
+    html_content = "Dear %s, <br>You have a new message from %s on the eventually platform regarding the event you created titled : %s. " \
+                   "<br> Meanwhile, here are the contents : <br>%s <br><br>You can respond directly to the user by sending a mail to %s.  <br><br>Warm Regards, <br>Matt from the Eventually messaging team." \
+                   % (user, from_username, event_title, message, from_email)
+
+    message = EmailMultiAlternatives(title, text_content, 'messages@eventually.com', [to_email])
+    message.attach_alternative(html_content, "text/html")
+
     try:
-        send_mail(title, message, 'messages@eventually.com', [to_email], fail_silently=False)
+        message.send()
         data = {
             'is_sent': True
         }
@@ -708,6 +737,6 @@ def send_event_owner_mail(request):
         }
         return JsonResponse(data)
 
+
 def handler404(request):
     return render(request, 'eventually/404.html', status=404)
-
