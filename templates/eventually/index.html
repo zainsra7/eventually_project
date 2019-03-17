@@ -15,30 +15,36 @@ Index
 
     {% block body_block %}
 
-<!-- Host Event, Search Event, Popular Events (Using CSS Flexbox)-->
-<main>
-    <div class="main-container">
-        {% if user.is_authenticated%}
-        <div class="heading w3-animate-left white-text"><h2>Hi <em>{{user.first_name}}!</em></h2></div>
-        {% endif %}
-        <div class="heading w3-animate-zoom">
-            <div class="w3-panel w3-topbar w3-bottombar w3-border-blue">
-                <!-- Source: csstricks.com -->
-                <p class="w3-typewriter typewrite white-text w3-xxlarge flow-text" data-period="80" data-type='[ "Be a Host.", "Join an Event.", "@UoG", "Engage, Have Fun !" ]'>
-                    <span class="wrap"></span>
-                </p>
+    <!-- Host Event, Search Event, Popular Events (Using CSS Flexbox)-->
+    <main>
+            {% if error %}
+            <div class="heading w3-animate-top w3-panel white-text center-align red container">
+                    <span onclick="this.parentElement.style.display='none'" class="w3-button w3-display-topright">X</span>
+                    <p>{{error}}</p>
             </div>
-        </div>
+            {% endif %}
+        <div class="main-container">
+            {% if user.is_authenticated%}
+            <div class="heading w3-animate-left white-text">
+                <h2>Hi <em>{{user.first_name}}!</em></h2>
+            </div>
+            {% endif %}
+            <div class="heading w3-animate-zoom">
+                <div class="w3-panel w3-topbar w3-bottombar w3-border-blue">
+                    <!-- Source: csstricks.com -->
+                    <p class="w3-typewriter typewrite white-text w3-xxlarge flow-text" data-period="80" data-type='[ "Be a Host.", "Join an Event.", "@UoG", "Engage, Have Fun !" ]'>
+                        <span class="wrap"></span>
+                    </p>
+                </div>
+            </div>
             <div class="host-search-bar black">
-                <a id="host-btn" href="{% url 'host' %}" class="waves-effect waves-green waves-light btn"><i
-                        class="material-icons left">add_circle</i>Host</a>
+                <a id="host-btn" href="{% url 'host' %}" class="waves-effect waves-green waves-light btn"><i class="material-icons left">add_circle</i>Host</a>
                 <form id="search-form" method="GET" action="{% url 'search' %}">
                     <div class="input-field inline">
                         <input id="search" type="text" name="search" class="validate white-text">
                         <label for="search">Search</label>
                     </div>
-                    <a id="search-btn" type="submit"
-                        class="waves-effect waves-green btn-floating green white-text waves-circle"><i
+                    <a id="search-btn" type="submit" class="waves-effect waves-green btn-floating green white-text waves-circle"><i
                             class="material-icons">search</i></a>
                 </form>
             </div>

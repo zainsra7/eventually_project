@@ -12,10 +12,12 @@ Register
         <form id="user_form" method="POST" action="{% url 'register' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="card-content">
-                {% if email_error  %}
-                        <strong style = "color:red;">{{ email_error }}</strong>
+                <div class="ribbon">
+                    <a href="">Sign Up</a>
+                </div>
+                {% if email_error %}
+                <strong class="errorlist">{{ email_error }}</strong>
                 {% endif %}
-                <span class="card-title center">Register - Eventually</span>
                 {% csrf_token %}
                 <div class="row">
                     {{ user_form.as_p }}

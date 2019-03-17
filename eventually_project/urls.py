@@ -10,3 +10,5 @@ urlpatterns = [
     url(r'^eventually/', include('eventually.urls')),
     url(r'^admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+handler404 = views.handler404

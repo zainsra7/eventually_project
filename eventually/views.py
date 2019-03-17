@@ -517,7 +517,7 @@ def user_login(request):
                 profile = UserProfile.objects.get(user=user)
             except ObjectDoesNotExist:
                 return render(request, 'eventually/index.html',
-                              {'error': 'No user matches the details inputted', "events": popular_events()})
+                              {'error': 'Invalid Username/Password combination. Please try again!', "events": popular_events()})
 
             if profile.approved is False:
                 # save user profile id to session
@@ -536,7 +536,7 @@ def user_login(request):
             # Bad login details were provided, So we can't log the user in
             print("Invalid login details: {0}, {1}".format(username, password))
             return render(request, 'eventually/index.html',
-                          {'error': 'No user matches the details inputted', "events": popular_events()})
+                          {'error': 'Invalid Username/Password combination. Please try again!', "events": popular_events()})
 
     # The request is not HTTP POST, so display the login form
     # This scenario would most likely be a HTTP GET
@@ -557,8 +557,6 @@ def send_mail_api(username, email, ver_code):
 
 def send_events_qr_code(username, email, event_name, event_date, event_venue):
     picture_title = "%s_tickets_%s.png" % (event_name, username)
-    print(picture_title)
-
     image = qrcode.make(picture_title)
     imageByteArray = io.BytesIO()
     image.save(imageByteArray, format='PNG')
@@ -710,4 +708,7 @@ def send_event_owner_mail(request):
             'is_sent': False
         }
         return JsonResponse(data)
+
+def handler404(request):
+    return render(request, 'eventually/404.html', status=404)
 
