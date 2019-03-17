@@ -13,8 +13,8 @@ SECRET_KEY = 'l8rw$%qdwtw=39+26ykdo^-ste1t9^1g9fiw$vcs+p2zwxhw8k'
 EMAIL_HOST = 'smtp.sendgrid.net'
 
 # Enter host user name here
-EMAIL_HOST_USER = 'samuelagbede'
-EMAIL_HOST_PASSWORD = 'eventually1234'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
