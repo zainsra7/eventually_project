@@ -313,7 +313,7 @@ def join_event(request):
                                             event.date,
                                             event.address)
                     else:
-                        send_events_qr_code_unregister(user_profile.user.username, user_profile.user.email, event.title,
+                        send_events_qr_code_deregister(user_profile.user.username, user_profile.user.email, event.title,
                                                        event.date,
                                                        event.address)
                     attendee = Attendee(event=event, user=user_profile)
