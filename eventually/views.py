@@ -329,7 +329,7 @@ def join_event(request):
 
 
 # Function to let users edit their profile
-@login_required
+@login_required(login_url='register')
 def user_profile(request):
     # Successful profile_update check
     profile_update = False
@@ -740,3 +740,6 @@ def send_event_owner_mail(request):
 
 def handler404(request):
     return render(request, 'eventually/404.html', status=404)
+
+def handler500(request):
+    return render(request, 'eventually/500.html', status=500)
