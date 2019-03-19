@@ -101,11 +101,11 @@ Event
 
     <!-- Options -->
     <div class="options-bar">
-
+        {% if user.is_authenticated %}
       <!-- Contact host -->
       <a id="contact-host-btn" class="btn-floating pulse btn blue modal-trigger" data-target="contact-host"><i
           class="material-icons large">mail</i></a>
-
+        {% endif %}
       <!-- Edit event -->
       {% ifequal event.host.user user %}
       <a id="edit-event-btn" href="{% url 'edit_event' event.id%}"class="btn-floating pulse btn blue modal-trigger"><i

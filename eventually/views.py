@@ -156,7 +156,7 @@ def search(request):
 
 # Creating the event
 
-@login_required(login_url='register')
+@login_required
 def host(request):
     # Successful create_event check
     event_created = False
@@ -182,7 +182,7 @@ def host(request):
                 event_created = True
                 if 'image' in request.FILES:
                     image = request.FILES['image']
-                    if '.jpg' in image.name or '.png' in image.name:
+                    if '.jpg' in image.name or '.png' in image.name or '.jpeg' in image.name:
                         response = cloudinary.uploader.upload(request.FILES['image'],
                                                               folder="event_photo/",
                                                               public_id=event.id)
@@ -232,7 +232,7 @@ def edit_event(request, event_id):
                         event_updated = True
                         if 'image' in request.FILES:
                             image = request.FILES['image']
-                            if '.jpg' in image.name or '.png' in image.name:
+                            if '.jpg' in image.name or '.png' in image.name or '.jpeg' in image.name:
                                 response = cloudinary.uploader.upload(request.FILES['image'],
                                                                       folder="event_photo/",
                                                                       public_id=event.id)
@@ -290,7 +290,7 @@ def event(request, event_id):
     return render(request, 'eventually/event.html', context_dict)
 
 
-@login_required(login_url='register')
+@login_required
 def join_event(request):
     event_id = None
 
@@ -329,7 +329,7 @@ def join_event(request):
 
 
 # Function to let users edit their profile
-@login_required(login_url='register')
+@login_required
 def user_profile(request):
     # Successful profile_update check
     profile_update = False
@@ -357,7 +357,7 @@ def user_profile(request):
 
                 if 'profile_pic' in request.FILES:
                     picture = request.FILES['profile_pic']
-                    if '.jpg' in picture.name or '.png' in picture.name:
+                    if '.jpg' in picture.name or '.png' in picture.name or '.jpeg' in picture.name:
                         # Uploading Photo to Cloudinary in "user_photo" folder with id of username, it updates and replaces old version of file
                         response = cloudinary.uploader.upload(request.FILES['profile_pic'],
                                                               folder="user_photo/",
@@ -455,7 +455,7 @@ def register(request):
 
                 if 'profile_pic' in request.FILES:
                     picture = request.FILES['profile_pic']
-                    if '.jpg' in picture.name or '.png' in picture.name:
+                    if '.jpg' in picture.name or '.png' in picture.name or '.jpeg' in picture.name:
                         # Uploading Photo to Cloudinary in "user_photo" folder with id of username
                         response = cloudinary.uploader.upload(request.FILES['profile_pic'],
                                                               folder="user_photo/",
@@ -632,7 +632,7 @@ def account_confirmation(request):
                         return HttpResponseRedirect(reverse('index'))
             else:
                 return render(request, 'eventually/account_confirmation.html',
-                              {'error': 'Please enter a valid code. Wrong code inputted.'})
+                              {'error': 'Please enter a valid code!'})
         except User.DoesNotExist:
             return HttpResponseRedirect(reverse('register'))
 
