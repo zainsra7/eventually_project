@@ -8,7 +8,7 @@ According to SendGrid, username and password details cannot be uploaded to a pub
 username and password in the "eventually_project/settings.py":
 
 ```
-EMAIL_HOST_USER = 'samuelagbede'
+EMAIL_HOST_USER = '' # Insert the github username of the owner of this repository
 
 
 EMAIL_HOST_PASSWORD = 'eventually1234'
