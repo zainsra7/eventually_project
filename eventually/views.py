@@ -695,12 +695,12 @@ def password_reset(request):
     return render(request, 'eventually/forgot_password_confirmation.html', {})
 
 
-def contact(request):
-    return HttpResponse("Contact us page showing Team behind Eventually")
+def team(request):
+    return render(request, 'eventually/team.html', {})
 
 
 def about(request):
-    return HttpResponse("WHY")
+    return render(request, 'eventually/about.html', {})
 
 
 def send_event_owner_mail(request):

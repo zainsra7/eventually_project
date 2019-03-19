@@ -1,0 +1,107 @@
+{% extends 'eventually/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+Contact Us
+{% endblock %}
+{% block event_css %}
+<link href="{% static 'eventually/css/team.css' %}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block body_block %}
+
+<div class="w3-container w3-center w3-animate-zoom">
+    <h1>Eventually Team</h1>
+    <div class="row container">
+    <div class="col s4">
+      <div class="card red">
+          <div class="card-image waves-effect waves-block waves-light">
+              <img class="activator" src="https://res.cloudinary.com/eventually/image/upload/v1552782107/user_photo/zain_sra.jpg">
+            </div>
+        <span class="card-title"> Muhammad Zain</span>
+        <div class="card-content">
+          <p>Zain is very passionate about programming and attends various programming events and hackathons!
+              Through eventually, his vision is to bring people with same interests and passion together!</p>
+        </div>
+        <div class="card-reveal red">
+           <span class="card-title grey-text text-darken-4">Contact Me!<i class="material-icons right">close</i></span>
+                <a class ="btn-floating red" href="mailto:2418596u@student.gla.ac.uk"><i class="fab fa-google"></i></a>
+                 <a class ="btn-floating blue" href="https://www.github.com/zainsra7"><i class="fab fa-github"></i></a>
+        </div>
+    </div>
+    </div>
+
+    <div class="col s4">
+      <div class="card">
+          <div class="card-image waves-effect waves-block waves-light">
+              <img class="activator" src="https://res.cloudinary.com/eventually/image/upload/v1553018193/user_photo/yasser.jpg">
+            </div>
+        <span class="card-title">Muhammad Yasser</span>
+        <div class="card-content">
+          <p>From Electrical to Computing Science, Yasser realized his passion for computing through various events
+          and meetups! With Eventually, he has a vision to make people realize their passion by meetin new people and
+              attending variety of events.</p>
+        </div>
+        <div class="card-reveal">
+          <span class="card-title grey-text text-darken-4">Contact Me!<i class="material-icons right">close</i></span>
+          <a class ="btn-floating red" href="mailto:2420419o@student.gla.ac.uk"><i class="fab fa-google"></i></a>
+          <a class ="btn-floating blue" href="https://www.github.com/2420419o"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col s4">
+      <div class="card blue">
+        <div class="card-image waves-effect waves-block waves-light">
+          <img class="activator" src="https://res.cloudinary.com/eventually/image/upload/v1553018154/user_photo/sam.jpg">
+        </div>
+        <span class="card-title">Samuel Agbede</span>
+        <div class="card-content">
+          <p>Samuel wanted to be a part of Eventually because he loves to help people!!</p>
+        </div>
+        <div class="card-reveal blue">
+            <span class="card-title grey-text text-darken-4">Contact Me!<i class="material-icons right">close</i></span>
+            <a class ="btn-floating red" href="mailto:2370844a@student.gla.ac.uk"><i class="fab fa-google"></i></a>
+            <a class ="btn-floating blue" href="https://www.github.com/sammyplexus"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+    </div>
+  </div><div class="row container">
+    <div class="col s4">
+      <div class="card green">
+        <div class="card-image waves-effect waves-block waves-light">
+          <img class="activator" src="https://res.cloudinary.com/eventually/image/upload/v1553018154/user_photo/norah.jpg">
+        </div>
+          <span class="card-title ">Norah Alotaibi</span>
+        <div class="card-content">
+          <p>Norah loves teaching and explaining things to people! Through Eventually, she would love
+              to host events to learn and teach interesting stuff to people!</p>
+        </div>
+        <div class="card-reveal green">
+            <span class="card-title grey-text text-darken-4">Contact Me!<i class="material-icons right">close</i></span>
+            <a class ="btn-floating red" href="mailto:2363680a@student.gla.ac.uk"><i class="fab fa-google"></i></a>
+            <a class ="btn-floating blue" href="https://www.facebook.com/norah0x"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col s4">
+      <div class="card yellow">
+        <div class="card-image waves-effect waves-block waves-light">
+          <img class="activator" src="https://res.cloudinary.com/eventually/image/upload/v1553018279/user_photo/Smriti.jpg">
+        </div>
+          <span class="card-title ">Smriti Khandelwal</span>
+        <div class="card-content">
+          <p>Smriti loves to meet new poeple through various networking events. She loves food and
+          wants every student to know about the events with "Free Food" through Eventually!!</p>
+        </div>
+        <div class="card-reveal yellow">
+            <span class="card-title grey-text text-darken-4">Contact Me!<i class="material-icons right">close</i></span>
+            <a class ="btn-floating red" href="mailto:2418004k@student.gla.ac.uk"><i class="fab fa-google"></i></a>
+            <a class ="btn-floating blue" href="https://www.github.com/smiritikh"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+    </div>
+    </div>
+</div>
+{% endblock %}

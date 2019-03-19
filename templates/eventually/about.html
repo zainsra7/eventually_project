@@ -1,0 +1,24 @@
+{% extends 'eventually/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+Index
+{% endblock %}
+{% block css_block %}
+<link href="{% static 'eventually/css/about.css' %}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block body_block %}
+<!-- Slideshow container -->
+    <div class="bg-image img1"></div>
+    <div class="bg-image img2"></div>
+    <div class="bg-image img3"></div>
+    <div class="bg-image img4"></div>
+
+    <div class="bg-text black">Eventually is a platform for students from University of Glasgow,
+        to create and share experiences, attend events that bring joy in their busy and stressful lives.
+        From music, food, conferences, dance, to competitions and hackathons.
+        Our mission is to bring the whole University together through amazing experiences!
+    </div>
+
+{% endblock %}
