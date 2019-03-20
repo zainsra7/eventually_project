@@ -1,5 +1,8 @@
-# eventually_project
-Web application to host, join and share events at University of Glasgow.
+# Eventually
+Web application for hosting, sharing and joining local events at the University of Glasgow.
+
+#### Demonstration YouTube Video: https://youtu.be/H4MuH3j7ynQ
+#### Pythonanywhere Demo: http://eventually.pythonanywhere.com/
 
 
 ### Setup Email
@@ -19,8 +22,7 @@ EMAIL_HOST_PASSWORD = 'eventually1234'
 1. Clone Repo
 2. Create virtual Environment
 3. Makemigrations
-4. Migrate
-    a. If "No Such Table" error occurs, then execute following command:
+4. Migrate. If "No Such Table" error occurs, then execute following command:
         ```
         python manage.py migrate --run-syncdb
         ```
