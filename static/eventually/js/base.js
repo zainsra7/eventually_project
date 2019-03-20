@@ -9,4 +9,5 @@ $(document).ready(function(){
     $(".cancel-btn").click(function(){
       document.getElementById('login-modal').style.display='none';
     });
+    $("#id_email").attr("placeholder", "Please enter your UOG email address");
 });
